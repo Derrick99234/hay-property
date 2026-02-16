@@ -11,7 +11,9 @@ const globalForMongoose = globalThis as MongooseGlobal;
 
 export async function connectMongo() {
   const MONGODB_URI =
-    process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/hay_property";
+    process.env.MONGODB_URI
+  
+  if(!MONGODB_URI) throw new Error("Missing MONGODB_URI in environment.");
   if (process.env.NODE_ENV === "production" && !process.env.MONGODB_URI) {
     throw new Error("Missing MONGODB_URI in environment.");
   }

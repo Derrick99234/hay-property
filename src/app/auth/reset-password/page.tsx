@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
-import { resetPassword } from "../_lib/authStore";
 
 const ACCENT = "#f2555d";
 
@@ -24,8 +23,9 @@ function ResetPasswordClient() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const canSubmit = token.trim().length > 0 && password.length >= 6 && password === confirm;
+  const canSubmit = token.trim().length > 0 && password.length >= 6 && password === confirm && !loading;
 
   return (
     <div className="space-y-8">
@@ -63,13 +63,22 @@ function ResetPasswordClient() {
           e.preventDefault();
           if (!canSubmit) return;
           setError(null);
-          const res = resetPassword({ token, newPassword: password });
-          if (!res.ok) {
-            setError(res.error);
-            return;
-          }
-          setSuccess(true);
-          window.setTimeout(() => router.push("/auth/login"), 600);
+          setLoading(true);
+          fetch("/api/auth/reset-password", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ token, password }),
+          })
+            .then(async (r) => {
+              const data = (await r.json()) as { ok: boolean; error?: string };
+              if (!r.ok || !data.ok) throw new Error(data.error || "Reset failed.");
+              setSuccess(true);
+              window.setTimeout(() => router.push("/auth/login"), 600);
+            })
+            .catch((err: unknown) => {
+              setError(err instanceof Error ? err.message : "Reset failed.");
+            })
+            .finally(() => setLoading(false));
         }}
       >
         <div className="grid gap-4 sm:grid-cols-2">
@@ -106,7 +115,7 @@ function ResetPasswordClient() {
               boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
             }}
           >
-            Reset password
+            {loading ? "Resetting..." : "Reset password"}
           </button>
         </div>
       </form>

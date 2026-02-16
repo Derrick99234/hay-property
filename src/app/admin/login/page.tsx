@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 
@@ -32,13 +33,7 @@ function AdminLoginClient() {
       <div className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <LogoMark />
-            <div className="flex flex-col leading-none">
-              <span className="text-sm font-semibold tracking-tight">
-                HAY Property
-              </span>
-              <span className="text-[11px] text-zinc-500">Admin access</span>
-            </div>
+            <Image src="/logo/logo1.png" alt="HAY Property" width={150} height={80} />
           </Link>
           <Link
             href="/"
@@ -97,7 +92,7 @@ function AdminLoginClient() {
                   onChange={(e) => setEmail(e.target.value)}
                   inputMode="email"
                   className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
-                  placeholder="admin@domain.com"
+                  placeholder="Email address"
                 />
               </Field>
 
@@ -140,11 +135,7 @@ function AdminLoginClient() {
                 Admin access
               </div>
               <div className="rounded-2xl bg-white/10 p-5 text-sm text-white/85 ring-1 ring-white/10">
-                Use an admin email and password stored in MongoDB.
-              </div>
-              <div className="rounded-2xl bg-white/10 p-5 text-sm text-white/85 ring-1 ring-white/10">
-                If this is a fresh database, create your first admin by POSTing to{" "}
-                <span className="font-semibold text-white">/api/admins</span>.
+                This portal is restricted to authorized staff. If you need access, contact your administrator.
               </div>
             </div>
           </aside>
@@ -160,35 +151,5 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <div className="text-xs font-semibold text-zinc-600">{label}</div>
       {children}
     </label>
-  );
-}
-
-function LogoMark() {
-  return (
-    <div
-      className="grid size-9 place-items-center rounded-xl bg-[rgba(242,85,93,0.12)]"
-      aria-hidden="true"
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M6.2 5.4 12 2l5.8 3.4v6.2L12 15 6.2 11.6V5.4Z"
-          stroke={ACCENT}
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M12 15v7"
-          stroke={ACCENT}
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
   );
 }

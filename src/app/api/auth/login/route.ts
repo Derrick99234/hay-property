@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
 
   const { passwordHash, ...safe } = user as { passwordHash?: unknown };
   const res = NextResponse.json({ ok: true, data: safe });
-  setSession(res, { role: "user", subject: String((user as { _id: unknown })._id) });
+  await setSession(res, { role: "user", subject: String((user as { _id: unknown })._id) });
   return res;
 }
-

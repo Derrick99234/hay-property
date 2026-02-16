@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export async function GET(req: NextRequest) {
   await connectMongo();
 
-  const admin = isAdmin(req);
+  const admin = await isAdmin(req);
   const { limit, skip, page } = getPagination(req.nextUrl.searchParams);
   const filter: Record<string, unknown> = {};
   if (!admin) filter.status = "AVAILABLE";
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   await connectMongo();
 
   try {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     const title = body.title?.trim();
     const slug = body.slug?.trim().toLowerCase();
-    const session = getSession(req);
+    const session = await getSession(req);
     const createdById = session?.subject ?? "";
 
     if (!title || title.length < 2) return jsonError("Invalid title.", { status: 400 });

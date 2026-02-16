@@ -13,7 +13,7 @@ function getIdFromParams(params: { id?: string }) {
 }
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   const params = await ctx.params;
   const id = getIdFromParams(params);
   if (!id) return jsonError("Missing id.", { status: 400 });
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 }
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   const params = await ctx.params;
   const id = getIdFromParams(params);
   if (!id) return jsonError("Missing id.", { status: 400 });
@@ -66,7 +66,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 }
 
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   const params = await ctx.params;
   const id = getIdFromParams(params);
   if (!id) return jsonError("Missing id.", { status: 400 });
@@ -76,4 +76,3 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   if (!deleted) return jsonError("Not found.", { status: 404 });
   return jsonOk({ id });
 }
-

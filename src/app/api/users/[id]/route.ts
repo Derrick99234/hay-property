@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const params = await ctx.params;
   const id = getIdFromParams(params);
   if (!id) return jsonError("Missing id.", { status: 400 });
-  if (!isSelfOrAdmin(req, id)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isSelfOrAdmin(req, id))) return jsonError("Unauthorized.", { status: 401 });
 
   await connectMongo();
   const doc = await User.findById(id).lean();
@@ -30,7 +30,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   const params = await ctx.params;
   const id = getIdFromParams(params);
   if (!id) return jsonError("Missing id.", { status: 400 });
-  if (!isSelfOrAdmin(req, id)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isSelfOrAdmin(req, id))) return jsonError("Unauthorized.", { status: 401 });
 
   await connectMongo();
 
@@ -46,7 +46,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     if (typeof body.email === "string") update.email = body.email.trim().toLowerCase();
     if (typeof body.name === "string") update.name = body.name.trim();
     if (typeof body.status === "string") {
-      if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+      if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
       update.status = body.status;
     }
     if (typeof body.password === "string") {
@@ -70,11 +70,10 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   const params = await ctx.params;
   const id = getIdFromParams(params);
   if (!id) return jsonError("Missing id.", { status: 400 });
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
 
   await connectMongo();
   const deleted = await User.findByIdAndDelete(id).lean();
   if (!deleted) return jsonError("Not found.", { status: 404 });
   return jsonOk({ id });
 }
-

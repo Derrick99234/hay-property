@@ -20,7 +20,7 @@ function findByIdOrSlug(idOrSlug: string) {
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   await connectMongo();
-  const admin = isAdmin(req);
+  const admin = await isAdmin(req);
 
   const params = await ctx.params;
   const id = getParam(params);
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 }
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   await connectMongo();
 
   const params = await ctx.params;
@@ -84,7 +84,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 }
 
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   await connectMongo();
 
   const params = await ctx.params;

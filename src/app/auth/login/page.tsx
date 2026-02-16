@@ -17,7 +17,7 @@ export default function LoginPage() {
 function LoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = useMemo(() => searchParams.get("next") ?? "/account", [searchParams]);
+  const nextUrl = useMemo(() => searchParams.get("next") ?? "/", [searchParams]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,6 +64,9 @@ function LoginClient() {
             .then(async (r) => {
               const data = (await r.json()) as { ok: boolean; error?: string };
               if (!r.ok || !data.ok) throw new Error(data.error || "Login failed.");
+              try {
+                window.sessionStorage.setItem("hay_auth_welcome", "1");
+              } catch {}
               router.push(nextUrl);
             })
             .catch((err: unknown) => {

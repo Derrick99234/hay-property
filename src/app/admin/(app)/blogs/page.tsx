@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Modal from "../_components/Modal";
-import Pagination from "../_components/Pagination";
-import { useAdminDB } from "../_components/AdminProvider";
-import { AdminBlog, formatDateShort } from "../_lib/adminStore";
+import Modal from "../../_components/Modal";
+import Pagination from "../../_components/Pagination";
+import { useAdminDB } from "../../_components/AdminProvider";
+import { AdminBlog, formatDateShort } from "../../_lib/adminStore";
 
 const ACCENT = "#f2555d";
 
@@ -37,10 +37,7 @@ export default function AdminBlogsPage() {
   const safePage = Math.min(Math.max(1, page), totalPages);
   const slice = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
-  const editing = useMemo(
-    () => db.blogs.find((b) => b.id === editingId) ?? null,
-    [db.blogs, editingId]
-  );
+  const editing = useMemo(() => db.blogs.find((b) => b.id === editingId) ?? null, [db.blogs, editingId]);
 
   const startCreate = () => {
     setEditingId(null);
@@ -83,25 +80,16 @@ export default function AdminBlogsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Admin
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
-            Blogs
-          </h1>
-          <p className="text-sm text-zinc-600">
-            Manage blog posts with pagination and CRUD.
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Admin</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Blogs</h1>
+          <p className="text-sm text-zinc-600">Manage blog posts with pagination and CRUD.</p>
         </div>
 
         <button
           type="button"
           onClick={startCreate}
           className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-          style={{
-            backgroundColor: ACCENT,
-            boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
-          }}
+          style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
           Add post
         </button>
@@ -146,17 +134,13 @@ export default function AdminBlogsPage() {
                   <tr key={b.id} className="hover:bg-zinc-50/50">
                     <td className="px-5 py-4">
                       <div className="font-semibold text-zinc-900">{b.title}</div>
-                      <div className="mt-1 line-clamp-1 text-sm text-zinc-600">
-                        {b.excerpt}
-                      </div>
+                      <div className="mt-1 line-clamp-1 text-sm text-zinc-600">{b.excerpt}</div>
                     </td>
                     <td className="px-5 py-4 text-zinc-600">{b.category}</td>
                     <td className="px-5 py-4">
                       <StatusPill published={b.published} />
                     </td>
-                    <td className="px-5 py-4 text-zinc-600">
-                      {formatDateShort(b.createdAt)}
-                    </td>
+                    <td className="px-5 py-4 text-zinc-600">{formatDateShort(b.createdAt)}</td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-2">
                         <button
@@ -190,25 +174,12 @@ export default function AdminBlogsPage() {
         </div>
 
         <div className="border-t border-zinc-100 px-5 py-4">
-          <Pagination
-            page={safePage}
-            pageSize={pageSize}
-            total={total}
-            onPageChange={setPage}
-          />
+          <Pagination page={safePage} pageSize={pageSize} total={total} onPageChange={setPage} />
         </div>
       </div>
 
-      <Modal
-        open={open}
-        title={editing ? "Edit post" : "Add post"}
-        onClose={() => setOpen(false)}
-      >
-        <BlogForm
-          initial={editing}
-          onCancel={() => setOpen(false)}
-          onSubmit={onSubmit}
-        />
+      <Modal open={open} title={editing ? "Edit post" : "Add post"} onClose={() => setOpen(false)}>
+        <BlogForm initial={editing} onCancel={() => setOpen(false)} onSubmit={onSubmit} />
       </Modal>
     </div>
   );
@@ -238,15 +209,7 @@ function BlogForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!canSubmit) return;
-        onSubmit({
-          title: title.trim(),
-          slug: slug.trim().toLowerCase(),
-          category: category.trim(),
-          excerpt: excerpt.trim(),
-          coverUrl: coverUrl.trim(),
-          content: content.trim(),
-          published,
-        });
+        onSubmit({ title: title.trim(), slug: slug.trim().toLowerCase(), category: category.trim(), excerpt: excerpt.trim(), coverUrl: coverUrl.trim(), content: content.trim(), published });
       }}
       className="space-y-4"
     >
@@ -329,10 +292,7 @@ function BlogForm({
           type="submit"
           disabled={!canSubmit}
           className="h-10 rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            backgroundColor: ACCENT,
-            boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
-          }}
+          style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
           Save
         </button>
@@ -341,13 +301,7 @@ function BlogForm({
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-2">
       <div className="text-xs font-semibold text-zinc-600">{label}</div>
@@ -357,14 +311,9 @@ function Field({
 }
 
 function StatusPill({ published }: { published: boolean }) {
-  const cfg = published
-    ? { bg: "rgba(34,197,94,0.12)", fg: "#16a34a", label: "published" }
-    : { bg: "rgba(245,158,11,0.14)", fg: "#b45309", label: "draft" };
+  const cfg = published ? { bg: "rgba(34,197,94,0.12)", fg: "#16a34a", label: "published" } : { bg: "rgba(245,158,11,0.14)", fg: "#b45309", label: "draft" };
   return (
-    <span
-      className="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
-      style={{ backgroundColor: cfg.bg, color: cfg.fg }}
-    >
+    <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: cfg.bg, color: cfg.fg }}>
       {cfg.label}
     </span>
   );
@@ -372,26 +321,10 @@ function StatusPill({ published }: { published: boolean }) {
 
 function IconSearch({ className }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M16 16.2 21 21.2"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" strokeWidth="2" />
+      <path d="M16 16.2 21 21.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
+

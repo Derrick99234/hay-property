@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { pickHeroImage } from "../../lib/unsplash";
+import Image from "next/image";
 
 type Slide = {
   title: string;
@@ -78,15 +79,15 @@ export default function HeroCarousel({ accent }: { accent: string }) {
       <div className="absolute inset-0 bg-[radial-gradient(900px_560px_at_18%_30%,rgba(34,197,94,0.22),transparent),radial-gradient(900px_560px_at_85%_20%,rgba(59,130,246,0.18),transparent),linear-gradient(115deg,rgba(0,0,0,0.70),rgba(0,0,0,0.30),rgba(0,0,0,0.08))]" />
 
       <div className="relative grid min-h-[420px] gap-10 px-8 py-10 sm:min-h-[460px] sm:px-12 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slide.title}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="space-y-5"
-            >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={slide.title}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="space-y-5"
+          >
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
               {slide.title}
               <br />
@@ -122,10 +123,10 @@ export default function HeroCarousel({ accent }: { accent: string }) {
             <div className="mt-10 flex flex-wrap items-end justify-between gap-6">
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-2">
-                  <AvatarCircle className="bg-rose-400" />
-                  <AvatarCircle className="bg-amber-300" />
-                  <AvatarCircle className="bg-emerald-300" />
-                  <AvatarCircle className="bg-sky-300" />
+                  <AvatarCircle src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHByb2ZpbGV8ZW58MHx8MHx8fDA%3D" />
+                  <AvatarCircle src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
+                  <AvatarCircle src="https://img.freepik.com/free-photo/smiling-black-woman-with-curly-hair-hoop-earrings_23-2152009570.jpg" />
+                  <AvatarCircle src="https://img.freepik.com/free-photo/portrait-beautiful-smiling-woman-with-curly-hair-looking-camera_1098-20801.jpg?t=st=1771079611~exp=1771083211~hmac=ea28492b9b3fed1188d70f4d63701f3347c25c46b2d850fc51d65241e4c06ffb&w=1480" />
                 </div>
                 <div className="text-sm font-semibold text-white">
                   50K+ Happy Clients
@@ -144,22 +145,24 @@ export default function HeroCarousel({ accent }: { accent: string }) {
                 <div className="text-xs text-white/70">(1,245)</div>
               </div>
             </div>
-            </motion.div>
-          </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
 
-          <div className="hidden lg:block">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={slide.imageUrl}
-                initial={{ opacity: 0, y: 14, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.985 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
-                className="relative aspect-[4/3] overflow-hidden rounded-[28px] ring-1 ring-white/10"
-              >
-              <img
+        <div className="hidden lg:block">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={slide.imageUrl}
+              initial={{ opacity: 0, y: 14, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.985 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="relative aspect-[4/3] overflow-hidden rounded-[28px] ring-1 ring-white/10"
+            >
+              <Image
                 src={slide.imageUrl}
                 alt={slide.mediaLabel}
+                width={1200}
+                height={800}
                 className="absolute inset-0 h-full w-full object-cover"
                 loading="lazy"
                 referrerPolicy="no-referrer"
@@ -173,29 +176,29 @@ export default function HeroCarousel({ accent }: { accent: string }) {
                   {slide.mediaLabel}
                 </div>
               </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
+      </div>
 
-        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2">
-          {slides.map((_, i) => {
-            const active = i === index;
-            return (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Go to slide ${i + 1}`}
-                onClick={() => goTo(i)}
-                className={[
-                  "size-2 rounded-full transition",
-                  active ? "bg-white/85" : "bg-white/35 hover:bg-white/55",
-                ].join(" ")}
-              />
-            );
-          })}
-        </div>
-        <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
+      <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2">
+        {slides.map((_, i) => {
+          const active = i === index;
+          return (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => goTo(i)}
+              className={[
+                "size-2 rounded-full transition",
+                active ? "bg-white/85" : "bg-white/35 hover:bg-white/55",
+              ].join(" ")}
+            />
+          );
+        })}
+      </div>
+      <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
     </div>
   );
 }
@@ -246,9 +249,13 @@ function VideoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
-function AvatarCircle({ className }: { className: string }) {
+function AvatarCircle({ className, src }: { className?: string, src: string }) {
   return (
-    <div
+    <Image
+      src={src}
+      alt="Hay Property client image"
+      width={40}
+      height={40}
       className={["size-9 rounded-full ring-2 ring-white/20", className].join(" ")}
       aria-hidden="true"
     />

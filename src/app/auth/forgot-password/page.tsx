@@ -2,20 +2,20 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { createResetToken, findUserByEmail } from "../_lib/authStore";
 
 const ACCENT = "#f2555d";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [resetUrl, setResetUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = email.trim().includes("@");
+  const canSubmit = email.trim().includes("@") && !loading;
 
   const helper = useMemo(() => {
     if (!submitted) return null;
-    return "If an account exists for this email, a reset link is generated.";
+    return "If an account exists for this email, you'll receive a password reset link shortly.";
   }, [submitted]);
 
   return (
@@ -28,25 +28,19 @@ export default function ForgotPasswordPage() {
           Forgot password
         </h1>
         <p className="text-sm text-zinc-600">
-          Enter your email and we&apos;ll generate a reset link.
+          Enter your email and we&apos;ll send a reset link.
         </p>
       </div>
+
+      {error ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error}
+        </div>
+      ) : null}
 
       {helper ? (
         <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
           {helper}
-        </div>
-      ) : null}
-
-      {resetUrl ? (
-        <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">
-          <div className="font-semibold text-zinc-900">Demo reset link</div>
-          <div className="mt-1 break-all">{resetUrl}</div>
-          <div className="mt-3">
-            <Link href={resetUrl} className="text-sm font-semibold" style={{ color: ACCENT }}>
-              Open reset page
-            </Link>
-          </div>
         </div>
       ) : null}
 
@@ -55,14 +49,22 @@ export default function ForgotPasswordPage() {
         onSubmit={(e) => {
           e.preventDefault();
           if (!canSubmit) return;
+          setLoading(true);
+          setError(null);
           setSubmitted(true);
-          const exists = findUserByEmail(email);
-          if (!exists) {
-            setResetUrl(null);
-            return;
-          }
-          const token = createResetToken(email);
-          setResetUrl(`/auth/reset-password?token=${encodeURIComponent(token)}`);
+          fetch("/api/auth/forgot-password", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email }),
+          })
+            .then(async (r) => {
+              const data = (await r.json()) as { ok: boolean; error?: string };
+              if (!r.ok || !data.ok) throw new Error(data.error || "Request failed.");
+            })
+            .catch((err: unknown) => {
+              setError(err instanceof Error ? err.message : "Request failed.");
+            })
+            .finally(() => setLoading(false));
         }}
       >
         <Field label="Email">
@@ -88,7 +90,7 @@ export default function ForgotPasswordPage() {
               boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
             }}
           >
-            Generate link
+            {loading ? "Sending..." : "Send link"}
           </button>
         </div>
       </form>
@@ -104,4 +106,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
-

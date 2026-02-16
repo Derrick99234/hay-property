@@ -9,7 +9,7 @@ import { hashPassword } from "../_lib/password";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   await connectMongo();
 
   const { limit, skip, page } = getPagination(req.nextUrl.searchParams);
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAdmin(req)) return jsonError("Unauthorized.", { status: 401 });
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
   await connectMongo();
 
   try {

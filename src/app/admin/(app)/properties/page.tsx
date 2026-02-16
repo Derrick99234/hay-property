@@ -1,14 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Modal from "../_components/Modal";
-import Pagination from "../_components/Pagination";
-import { useAdminDB } from "../_components/AdminProvider";
-import {
-  AdminProperty,
-  formatDateShort,
-  formatMoneyNGN,
-} from "../_lib/adminStore";
+import Modal from "../../_components/Modal";
+import Pagination from "../../_components/Pagination";
+import { useAdminDB } from "../../_components/AdminProvider";
+import { AdminProperty, formatDateShort, formatMoneyNGN } from "../../_lib/adminStore";
 
 const ACCENT = "#f2555d";
 
@@ -26,9 +22,7 @@ export default function AdminPropertiesPage() {
     const items = q
       ? db.properties.filter(
           (p) =>
-            p.title.toLowerCase().includes(q) ||
-            p.location.toLowerCase().includes(q) ||
-            p.status.toLowerCase().includes(q)
+            p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.status.toLowerCase().includes(q)
         )
       : db.properties;
     return items;
@@ -39,10 +33,7 @@ export default function AdminPropertiesPage() {
   const safePage = Math.min(Math.max(1, page), totalPages);
   const slice = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
-  const editing = useMemo(
-    () => db.properties.find((p) => p.id === editingId) ?? null,
-    [db.properties, editingId]
-  );
+  const editing = useMemo(() => db.properties.find((p) => p.id === editingId) ?? null, [db.properties, editingId]);
 
   const startCreate = () => {
     setEditingId(null);
@@ -63,7 +54,14 @@ export default function AdminPropertiesPage() {
     }
   };
 
-  const onSubmit = async (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; coverUrl: string }) => {
+  const onSubmit = async (input: {
+    title: string;
+    slug: string;
+    location: string;
+    price: number;
+    status: AdminProperty["status"];
+    coverUrl: string;
+  }) => {
     try {
       if (editing) await updateProperty(editing.id, input);
       else await createProperty(input);
@@ -77,25 +75,16 @@ export default function AdminPropertiesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Admin
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
-            Properties
-          </h1>
-          <p className="text-sm text-zinc-600">
-            Manage properties with pagination and CRUD.
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Admin</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Properties</h1>
+          <p className="text-sm text-zinc-600">Manage properties with pagination and CRUD.</p>
         </div>
 
         <button
           type="button"
           onClick={startCreate}
           className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-          style={{
-            backgroundColor: ACCENT,
-            boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
-          }}
+          style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
           Add property
         </button>
@@ -139,19 +128,13 @@ export default function AdminPropertiesPage() {
               ) : (
                 slice.map((p) => (
                   <tr key={p.id} className="hover:bg-zinc-50/50">
-                    <td className="px-5 py-4 font-semibold text-zinc-900">
-                      {p.title}
-                    </td>
+                    <td className="px-5 py-4 font-semibold text-zinc-900">{p.title}</td>
                     <td className="px-5 py-4 text-zinc-600">{p.location}</td>
-                    <td className="px-5 py-4 font-semibold text-zinc-900">
-                      {formatMoneyNGN(p.price)}
-                    </td>
+                    <td className="px-5 py-4 font-semibold text-zinc-900">{formatMoneyNGN(p.price)}</td>
                     <td className="px-5 py-4">
                       <StatusPill status={p.status} />
                     </td>
-                    <td className="px-5 py-4 text-zinc-600">
-                      {formatDateShort(p.createdAt)}
-                    </td>
+                    <td className="px-5 py-4 text-zinc-600">{formatDateShort(p.createdAt)}</td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-2">
                         <button
@@ -178,25 +161,12 @@ export default function AdminPropertiesPage() {
         </div>
 
         <div className="border-t border-zinc-100 px-5 py-4">
-          <Pagination
-            page={safePage}
-            pageSize={pageSize}
-            total={total}
-            onPageChange={setPage}
-          />
+          <Pagination page={safePage} pageSize={pageSize} total={total} onPageChange={setPage} />
         </div>
       </div>
 
-      <Modal
-        open={open}
-        title={editing ? "Edit property" : "Add property"}
-        onClose={() => setOpen(false)}
-      >
-        <PropertyForm
-          initial={editing}
-          onCancel={() => setOpen(false)}
-          onSubmit={onSubmit}
-        />
+      <Modal open={open} title={editing ? "Edit property" : "Add property"} onClose={() => setOpen(false)}>
+        <PropertyForm initial={editing} onCancel={() => setOpen(false)} onSubmit={onSubmit} />
       </Modal>
     </div>
   );
@@ -215,34 +185,19 @@ function PropertyForm({
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
   const [coverUrl, setCoverUrl] = useState("");
-  const [price, setPrice] = useState(
-    initial?.price ? String(initial.price) : ""
-  );
-  const [status, setStatus] = useState<AdminProperty["status"]>(
-    initial?.status ?? "DRAFT"
-  );
+  const [price, setPrice] = useState(initial?.price ? String(initial.price) : "");
+  const [status, setStatus] = useState<AdminProperty["status"]>(initial?.status ?? "DRAFT");
 
   const parsedPrice = Number(price.replaceAll(",", ""));
   const canSubmit =
-    title.trim().length > 2 &&
-    slug.trim().length > 2 &&
-    location.trim().length > 2 &&
-    Number.isFinite(parsedPrice) &&
-    parsedPrice > 0;
+    title.trim().length > 2 && slug.trim().length > 2 && location.trim().length > 2 && Number.isFinite(parsedPrice) && parsedPrice > 0;
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         if (!canSubmit) return;
-        onSubmit({
-          title: title.trim(),
-          slug: slug.trim().toLowerCase(),
-          location: location.trim(),
-          coverUrl: coverUrl.trim(),
-          price: parsedPrice,
-          status,
-        });
+        onSubmit({ title: title.trim(), slug: slug.trim().toLowerCase(), location: location.trim(), coverUrl: coverUrl.trim(), price: parsedPrice, status });
       }}
       className="space-y-4"
     >
@@ -295,9 +250,7 @@ function PropertyForm({
         <Field label="Status">
           <select
             value={status}
-            onChange={(e) =>
-              setStatus(e.target.value as AdminProperty["status"])
-            }
+            onChange={(e) => setStatus(e.target.value as AdminProperty["status"])}
             className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
           >
             <option value="DRAFT">DRAFT</option>
@@ -319,10 +272,7 @@ function PropertyForm({
           type="submit"
           disabled={!canSubmit}
           className="h-10 rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            backgroundColor: ACCENT,
-            boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
-          }}
+          style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
           Save
         </button>
@@ -331,13 +281,7 @@ function PropertyForm({
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-2">
       <div className="text-xs font-semibold text-zinc-600">{label}</div>
@@ -354,10 +298,7 @@ function StatusPill({ status }: { status: AdminProperty["status"] }) {
         ? { bg: "rgba(239,68,68,0.12)", fg: "#ef4444" }
         : { bg: "rgba(245,158,11,0.14)", fg: "#b45309" };
   return (
-    <span
-      className="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
-      style={{ backgroundColor: cfg.bg, color: cfg.fg }}
-    >
+    <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: cfg.bg, color: cfg.fg }}>
       {status}
     </span>
   );
@@ -365,26 +306,10 @@ function StatusPill({ status }: { status: AdminProperty["status"] }) {
 
 function IconSearch({ className }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M16 16.2 21 21.2"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" strokeWidth="2" />
+      <path d="M16 16.2 21 21.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
+

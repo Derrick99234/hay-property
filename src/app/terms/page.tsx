@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const ACCENT = "#f2555d";
 
@@ -12,8 +13,7 @@ export default function TermsPage() {
       <div className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <LogoMark />
-            <div className="text-sm font-semibold tracking-tight">HAY Property</div>
+            <Image src="/logo/logo1.png" alt="HAY Property" width={140} height={72} />
           </Link>
           <div className="flex items-center gap-4 text-sm font-semibold text-zinc-700">
             <Link className="hover:text-zinc-900" href="/privacy-policy">
@@ -100,20 +100,3 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
-
-function LogoMark() {
-  return (
-    <div className="grid size-9 place-items-center rounded-xl bg-[rgba(242,85,93,0.12)]" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M6.2 5.4 12 2l5.8 3.4v6.2L12 15 6.2 11.6V5.4Z"
-          stroke={ACCENT}
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        <path d="M12 15v7" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    </div>
-  );
-}
-

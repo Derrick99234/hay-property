@@ -17,7 +17,7 @@ export default function RegisterPage() {
 function RegisterClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = useMemo(() => searchParams.get("next") ?? "/account", [searchParams]);
+  const nextUrl = useMemo(() => searchParams.get("next") ?? "/", [searchParams]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -70,6 +70,9 @@ function RegisterClient() {
             .then(async (r) => {
               const data = (await r.json()) as { ok: boolean; error?: string };
               if (!r.ok || !data.ok) throw new Error(data.error || "Registration failed.");
+              try {
+                window.sessionStorage.setItem("hay_auth_welcome", "1");
+              } catch {}
               router.push(nextUrl);
             })
             .catch((err: unknown) => {

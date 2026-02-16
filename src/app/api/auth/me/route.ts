@@ -8,7 +8,7 @@ import { jsonError, jsonOk } from "../../_lib/http";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  const session = getSession(req);
+  const session = await getSession(req);
   if (!session) return jsonOk({ session: null });
   if (session.role !== "user") return jsonOk({ session });
   if (!mongoose.isValidObjectId(session.subject)) return jsonOk({ session: null });
@@ -20,4 +20,3 @@ export async function GET(req: NextRequest) {
   const { passwordHash, ...safe } = user as { passwordHash?: unknown };
   return jsonOk({ session, user: safe });
 }
-

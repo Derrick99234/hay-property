@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
-import { consumeAdminResetToken, writeAdminPassword } from "../_lib/adminAuth";
 
 const ACCENT = "#f2555d";
 
@@ -24,12 +24,25 @@ function AdminResetPasswordClient() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const canSubmit = token.trim().length > 0 && password.length >= 6 && password === confirm;
+  const canSubmit = token.trim().length > 0 && password.length >= 6 && password === confirm && !loading;
 
   return (
     <div className="min-h-screen bg-[#eef1f5] text-zinc-900">
       <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-10">
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center">
+            <Image src="/logo/logo1.png" alt="HAY Property" width={150} height={80} />
+          </Link>
+          <Link
+            href="/"
+            className="rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 shadow-sm transition hover:border-zinc-300"
+          >
+            Back to site
+          </Link>
+        </div>
+
         <div className="rounded-[28px] bg-white p-7 shadow-sm ring-1 ring-zinc-100 sm:p-10">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
@@ -61,14 +74,22 @@ function AdminResetPasswordClient() {
               e.preventDefault();
               if (!canSubmit) return;
               setError(null);
-              const consumed = consumeAdminResetToken(token);
-              if (!consumed) {
-                setError("Invalid or expired reset link.");
-                return;
-              }
-              writeAdminPassword(password);
-              setSuccess(true);
-              window.setTimeout(() => router.push("/admin/login"), 600);
+              setLoading(true);
+              fetch("/api/admin/auth/reset-password", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ token, password }),
+              })
+                .then(async (r) => {
+                  const data = (await r.json()) as { ok: boolean; error?: string };
+                  if (!r.ok || !data.ok) throw new Error(data.error || "Reset failed.");
+                  setSuccess(true);
+                  window.setTimeout(() => router.push("/admin/login"), 600);
+                })
+                .catch((err: unknown) => {
+                  setError(err instanceof Error ? err.message : "Reset failed.");
+                })
+                .finally(() => setLoading(false));
             }}
           >
             <div className="grid gap-4 sm:grid-cols-2">
@@ -105,7 +126,7 @@ function AdminResetPasswordClient() {
                   boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
                 }}
               >
-                Reset password
+                {loading ? "Resetting..." : "Reset password"}
               </button>
             </div>
           </form>

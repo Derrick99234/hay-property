@@ -1,10 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { parseSessionCookie } from "./src/app/auth/_lib/session";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  const session = parseSessionCookie(req.headers.get("cookie"));
+  const session = await parseSessionCookie(req.headers.get("cookie"));
 
   if (pathname.startsWith("/admin")) {
     if (

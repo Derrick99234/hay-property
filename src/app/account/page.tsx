@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -42,6 +43,12 @@ export default function AccountPage() {
     <div className="min-h-screen bg-[#eef1f5] text-zinc-900">
       <div className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
+          <Link href="/" className="flex items-center">
+            <Image src="/logo/logo1.png" alt="HAY Property" width={150} height={80} />
+          </Link>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
               Account

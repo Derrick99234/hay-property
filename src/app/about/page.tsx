@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NewsletterForm from "../_components/NewsletterForm";
+import SiteHeader from "../_components/SiteHeader";
 
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
@@ -8,37 +9,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900">
       <div className="mx-auto w-full max-w-7xl px-5 pb-10 pt-8 sm:px-10 lg:px-16">
-        <header className="flex items-center justify-between py-6">
-          <Link href="/" className="flex items-center gap-2">
-            <LogoMark />
-            <div className="flex flex-col leading-none">
-              <span className="text-sm font-semibold tracking-tight">
-                HAY Property
-              </span>
-              <span className="text-[11px] text-zinc-500">
-                Real Estate &amp; Land
-              </span>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 md:flex">
-            <Link className="hover:text-zinc-900" href="/">
-              Home
-            </Link>
-            <Link className="text-zinc-900" href="/about">
-              About
-            </Link>
-            <Link className="hover:text-zinc-900" href="/properties">
-              Properties
-            </Link>
-            <Link className="hover:text-zinc-900" href="/blog">
-              Blog
-            </Link>
-            <Link className="hover:text-zinc-900" href="/contact">
-              Contact
-            </Link>
-          </nav>
-        </header>
+        <SiteHeader accent={ACCENT} />
 
         <main className="space-y-16 pb-6">
           <section className="grid gap-10 lg:grid-cols-[420px_1fr] lg:items-start">

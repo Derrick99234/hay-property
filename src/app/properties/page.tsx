@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { connectMongo } from "../../lib/mongodb";
 import { Property } from "../../models/Property";
 import { pickHeroImage, pickPropertyImage } from "../../lib/unsplash";
@@ -73,8 +74,7 @@ export default async function PropertiesPage({
             <div className="mx-auto w-full max-w-7xl px-5 py-6 sm:px-10 lg:px-16">
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 text-white">
-                  <LogoMark inverted />
-                  <div className="text-xs font-semibold tracking-tight">HAYPROPERTY</div>
+                  <Image src="/logo/logo1.png" alt="HAY Property" width={140} height={72} />
                 </Link>
                 <nav className="hidden items-center gap-7 text-xs font-semibold text-white/85 md:flex">
                   <Link className="hover:text-white" href="/">
@@ -193,8 +193,7 @@ export default async function PropertiesPage({
         <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-10 lg:px-16">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <LogoMark inverted />
-              <div className="text-sm font-semibold tracking-tight">HAY Property</div>
+              <Image src="/logo/logo1.png" alt="HAY Property" width={140} height={72} />
             </div>
             <div className="text-sm text-white/75">© {new Date().getFullYear()} HAY Property</div>
           </div>

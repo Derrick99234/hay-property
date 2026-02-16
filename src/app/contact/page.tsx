@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
@@ -7,7 +8,10 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900">
       <div className="mx-auto w-full max-w-7xl px-5 pb-20 pt-8 sm:px-10 lg:px-16">
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center">
+            <Image src="/logo/logo1.png" alt="HAY Property" width={140} height={72} />
+          </Link>
           <Link
             href="/"
             aria-label="Close"

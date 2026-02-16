@@ -3,6 +3,7 @@ import { connectMongo } from "../../lib/mongodb";
 import { Blog } from "../../models/Blog";
 import { pickBlogImage } from "../../lib/unsplash";
 import NewsletterForm from "../_components/NewsletterForm";
+import SiteHeader from "../_components/SiteHeader";
 
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
@@ -69,48 +70,7 @@ export default async function BlogPage({
   return (
     <div className="min-h-screen bg-[#eef1f5] text-zinc-900">
       <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-10 lg:px-16">
-        <header className="flex items-center justify-between py-6">
-          <Link href="/" className="flex items-center gap-2">
-            <LogoMark />
-            <div className="flex flex-col leading-none">
-              <span className="text-sm font-semibold tracking-tight">
-                HAY Property
-              </span>
-              <span className="text-[11px] text-zinc-500">
-                Real Estate &amp; Land
-              </span>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 md:flex">
-            <Link className="hover:text-zinc-900" href="/">
-              Home
-            </Link>
-            <Link className="hover:text-zinc-900" href="/about">
-              About
-            </Link>
-            <Link className="hover:text-zinc-900" href="/properties">
-              Properties
-            </Link>
-            <Link className="text-zinc-900" href="/blog">
-              Blog
-            </Link>
-            <Link className="hover:text-zinc-900" href="/contact">
-              Contact
-            </Link>
-          </nav>
-
-          <Link
-            href="/contact"
-            className="rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-            style={{
-              backgroundColor: ACCENT,
-              boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
-            }}
-          >
-            Get in touch
-          </Link>
-        </header>
+        <SiteHeader accent={ACCENT} />
 
         <main className="pb-16">
           <section className="relative overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-zinc-100">
