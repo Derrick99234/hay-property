@@ -68,12 +68,12 @@ export default function AdminDashboardClient() {
               Live database
             </div>
             <div className="text-sm text-zinc-600">
-              Admin data is loaded from MongoDB.
+              Refresh to get live data.
             </div>
           </div>
           <button
             type="button"
-            onClick={() => refresh().catch(() => {})}
+            onClick={() => refresh().catch(() => { })}
             className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-900 shadow-sm transition hover:border-zinc-300"
           >
             {loading ? "Refreshing..." : "Refresh"}
