@@ -3,9 +3,21 @@ import mongoose from "mongoose";
 import { connectMongo } from "../../../lib/mongodb";
 import { Blog } from "../../../models/Blog";
 import { getSession, isAdmin } from "../_lib/auth";
-import { getPagination, isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody } from "../_lib/http";
+import { getPagination, isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../_lib/http";
 
 export const runtime = "nodejs";
+
+async function ensureUniqueSlug(base: string) {
+  const safeBase = slugify(base);
+  if (!safeBase) return "";
+  let candidate = safeBase;
+  for (let i = 2; i < 50; i++) {
+    const exists = await Blog.exists({ slug: candidate });
+    if (!exists) return candidate;
+    candidate = `${safeBase}-${i}`;
+  }
+  return `${safeBase}-${Date.now().toString(36)}`;
+}
 
 export async function GET(req: NextRequest) {
   await connectMongo();
@@ -42,7 +54,7 @@ export async function POST(req: NextRequest) {
     }>(req);
 
     const title = body.title?.trim();
-    const slug = body.slug?.trim().toLowerCase();
+    const slug = await ensureUniqueSlug(body.slug ?? title ?? "");
     const session = await getSession(req);
     const authorId = session?.subject ?? "";
 

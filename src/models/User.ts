@@ -6,6 +6,7 @@ const UserSchema = new Schema(
     name: { type: String, required: true, trim: true },
     passwordHash: { type: String, required: true },
     status: { type: String, enum: ["ACTIVE", "DISABLED"], default: "ACTIVE" },
+    wishlist: { type: [Schema.Types.ObjectId], ref: "Property", default: [] },
   },
   { timestamps: true }
 );
@@ -20,6 +21,10 @@ UserSchema.set("toJSON", {
 });
 
 export type UserDoc = InferSchemaType<typeof UserSchema>;
+
+if (process.env.NODE_ENV !== "production") {
+  delete (mongoose.models as Record<string, unknown>).User;
+}
 
 export const User: Model<UserDoc> =
   (mongoose.models.User as Model<UserDoc>) || mongoose.model<UserDoc>("User", UserSchema);

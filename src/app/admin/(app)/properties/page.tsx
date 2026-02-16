@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Modal from "../../_components/Modal";
 import Pagination from "../../_components/Pagination";
 import { useAdminDB } from "../../_components/AdminProvider";
@@ -21,9 +21,9 @@ export default function AdminPropertiesPage() {
     const q = query.trim().toLowerCase();
     const items = q
       ? db.properties.filter(
-          (p) =>
-            p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.status.toLowerCase().includes(q)
-        )
+        (p) =>
+          p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q) || p.status.toLowerCase().includes(q)
+      )
       : db.properties;
     return items;
   }, [db.properties, query]);
@@ -181,12 +181,27 @@ function PropertyForm({
   onCancel: () => void;
   onSubmit: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; coverUrl: string }) => void;
 }) {
+  const initialTitle = initial?.title ?? "";
+  const initialSlug = initial?.slug ?? "";
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
   const [coverUrl, setCoverUrl] = useState("");
   const [price, setPrice] = useState(initial?.price ? String(initial.price) : "");
   const [status, setStatus] = useState<AdminProperty["status"]>(initial?.status ?? "DRAFT");
+
+  useEffect(() => {
+    const nextTitle = title.trim();
+    if (!initial) {
+      setSlug(toSlug(nextTitle));
+      return;
+    }
+    if (nextTitle && nextTitle !== initialTitle.trim()) {
+      setSlug(toSlug(nextTitle));
+      return;
+    }
+    setSlug(initialSlug);
+  }, [initial, initialSlug, initialTitle, title]);
 
   const parsedPrice = Number(price.replaceAll(",", ""));
   const canSubmit =
@@ -210,10 +225,10 @@ function PropertyForm({
         />
       </Field>
 
-      <Field label="Slug">
+      <Field label="Slug (auto)">
         <input
           value={slug}
-          onChange={(e) => setSlug(e.target.value)}
+          readOnly
           className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
           placeholder="e.g. pride-rock-estate"
         />
@@ -304,6 +319,16 @@ function StatusPill({ status }: { status: AdminProperty["status"] }) {
   );
 }
 
+function toSlug(input: string) {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function IconSearch({ className }: { className?: string }) {
   return (
     <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -312,4 +337,3 @@ function IconSearch({ className }: { className?: string }) {
     </svg>
   );
 }
-

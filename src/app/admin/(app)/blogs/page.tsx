@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Modal from "../../_components/Modal";
 import Pagination from "../../_components/Pagination";
 import { useAdminDB } from "../../_components/AdminProvider";
@@ -21,13 +21,13 @@ export default function AdminBlogsPage() {
     const q = query.trim().toLowerCase();
     const items = q
       ? db.blogs.filter(
-          (b) =>
-            b.title.toLowerCase().includes(q) ||
-            b.slug.toLowerCase().includes(q) ||
-            b.category.toLowerCase().includes(q) ||
-            b.excerpt.toLowerCase().includes(q) ||
-            String(b.published).includes(q)
-        )
+        (b) =>
+          b.title.toLowerCase().includes(q) ||
+          b.slug.toLowerCase().includes(q) ||
+          b.category.toLowerCase().includes(q) ||
+          b.excerpt.toLowerCase().includes(q) ||
+          String(b.published).includes(q)
+      )
       : db.blogs;
     return items;
   }, [db.blogs, query]);
@@ -194,6 +194,8 @@ function BlogForm({
   onCancel: () => void;
   onSubmit: (input: Omit<AdminBlog, "id" | "createdAt">) => void;
 }) {
+  const initialTitle = initial?.title ?? "";
+  const initialSlug = initial?.slug ?? "";
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [category, setCategory] = useState(initial?.category ?? "");
@@ -201,8 +203,52 @@ function BlogForm({
   const [coverUrl, setCoverUrl] = useState(initial?.coverUrl ?? "");
   const [content, setContent] = useState(initial?.content ?? "");
   const [published, setPublished] = useState(initial?.published ?? false);
+  const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
 
-  const canSubmit = title.trim().length > 4 && slug.trim().length > 2;
+  useEffect(() => {
+    const nextTitle = title.trim();
+    if (!initial) {
+      setSlug(toSlug(nextTitle));
+      return;
+    }
+    if (nextTitle && nextTitle !== initialTitle.trim()) {
+      setSlug(toSlug(nextTitle));
+      return;
+    }
+    setSlug(initialSlug);
+  }, [initial, initialSlug, initialTitle, title]);
+
+  const loadCategories = () => {
+    fetch("/api/blog-categories")
+      .then(async (r) => {
+        const payload = (await r.json()) as {
+          ok: boolean;
+          data?: { items?: Array<{ name?: string; slug?: string }> };
+        };
+        if (!payload.ok) return;
+        const items = Array.isArray(payload.data?.items) ? payload.data?.items : [];
+        const cleaned = items
+          .map((c) => ({ name: String(c?.name ?? "").trim(), slug: String(c?.slug ?? "").trim().toLowerCase() }))
+          .filter((c) => c.name && c.slug);
+        setCategories(cleaned);
+      })
+      .catch(() => { });
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const categoryOptions = useMemo(() => {
+    const names = new Set(categories.map((c) => c.name));
+    const current = category.trim();
+    if (current) names.add(current);
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }, [categories, category]);
+
+  const canSubmit = title.trim().length > 4 && slug.trim().length > 2 && category.trim().length > 1;
 
   return (
     <form
@@ -223,21 +269,63 @@ function BlogForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Slug">
+        <Field label="Slug (auto)">
           <input
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            readOnly
             className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
             placeholder="e.g. buying-land-in-lagos"
           />
         </Field>
         <Field label="Category">
-          <input
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
-            placeholder="e.g. Guide"
-          />
+          <div className="space-y-2">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+            >
+              <option value="">Select category</option>
+              {categoryOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <input
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+                placeholder="Add new category"
+              />
+              <button
+                type="button"
+                disabled={addingCategory || newCategory.trim().length < 2}
+                onClick={() => {
+                  const name = newCategory.trim();
+                  if (name.length < 2) return;
+                  setAddingCategory(true);
+                  fetch("/api/blog-categories", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({ name }),
+                  })
+                    .then(async (r) => {
+                      const payload = (await r.json()) as { ok: boolean };
+                      if (!payload.ok) return;
+                      setNewCategory("");
+                      setCategory(name);
+                      loadCategories();
+                    })
+                    .catch(() => { })
+                    .finally(() => setAddingCategory(false));
+                }}
+                className="h-11 shrink-0 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-900 shadow-sm transition hover:border-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Add
+              </button>
+            </div>
+          </div>
         </Field>
       </div>
 
@@ -319,6 +407,16 @@ function StatusPill({ published }: { published: boolean }) {
   );
 }
 
+function toSlug(input: string) {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function IconSearch({ className }: { className?: string }) {
   return (
     <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -327,4 +425,3 @@ function IconSearch({ className }: { className?: string }) {
     </svg>
   );
 }
-

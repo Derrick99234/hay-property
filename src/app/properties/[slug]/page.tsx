@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import mongoose from "mongoose";
+import { cookies } from "next/headers";
 import { connectMongo } from "../../../lib/mongodb";
 import { Property } from "../../../models/Property";
+import { User } from "../../../models/User";
 import { pickPropertyImage } from "../../../lib/unsplash";
+import WishlistButton from "../../_components/WishlistButton";
+import { parseSessionCookie } from "../../auth/_lib/session";
 
 const ACCENT = "#f2555d";
 
@@ -15,6 +20,13 @@ function fallbackCoverUrl(slug: string) {
 function formatMoneyNGN(value: number) {
   const safe = Number.isFinite(value) ? value : 0;
   return safe.toLocaleString(undefined, { style: "currency", currency: "NGN", maximumFractionDigits: 0 });
+}
+
+function cookieHeaderFromStore(store: Awaited<ReturnType<typeof cookies>>) {
+  return store
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
 }
 
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -47,6 +59,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
   }
   if (!doc) notFound();
 
+  const propertyId = String((doc as any)._id ?? "");
+  let wishActive = false;
+  try {
+    const store = await cookies();
+    const session = await parseSessionCookie(cookieHeaderFromStore(store));
+    if (session?.role === "user" && mongoose.isValidObjectId(session.subject) && mongoose.isValidObjectId(propertyId)) {
+      await connectMongo();
+      const user = await User.findById(session.subject, { wishlist: 1 }).lean();
+      const raw = Array.isArray((user as any)?.wishlist) ? (user as any).wishlist : [];
+      wishActive = raw.map((id: any) => String(id)).includes(propertyId);
+    }
+  } catch { }
+
   const title = String((doc as any).title ?? "");
   const description = String((doc as any).description ?? "");
   const city = String((doc as any).city ?? "");
@@ -73,13 +98,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
             <span aria-hidden="true">←</span>
             Back to properties
           </Link>
-          <Link
-            href="/contact"
-            className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-            style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
-          >
-            Enquire now
-          </Link>
+          <div className="flex items-center gap-3">
+            {propertyId ? <WishlistButton propertyId={propertyId} initialActive={wishActive} className="bg-white" /> : null}
+            <Link
+              href="/contact"
+              className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
+              style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+            >
+              Enquire now
+            </Link>
+          </div>
         </div>
 
         <div className="mt-6 overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-zinc-100">

@@ -1,9 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
+import mongoose from "mongoose";
+import { cookies } from "next/headers";
 import { connectMongo } from "../../lib/mongodb";
 import { Property } from "../../models/Property";
+import { User } from "../../models/User";
 import { pickHeroImage, pickPropertyImage } from "../../lib/unsplash";
 import NewsletterForm from "../_components/NewsletterForm";
+import WishlistButton from "../_components/WishlistButton";
+import { parseSessionCookie } from "../auth/_lib/session";
 
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
@@ -17,6 +22,13 @@ function fallbackCoverUrl(slug: string) {
 function formatMoneyNGN(value: number) {
   const safe = Number.isFinite(value) ? value : 0;
   return safe.toLocaleString(undefined, { style: "currency", currency: "NGN", maximumFractionDigits: 0 });
+}
+
+function cookieHeaderFromStore(store: Awaited<ReturnType<typeof cookies>>) {
+  return store
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
 }
 
 export default async function PropertiesPage({
@@ -54,6 +66,18 @@ export default async function PropertiesPage({
   } catch {
     dbError = true;
   }
+
+  let wishSet = new Set<string>();
+  try {
+    const store = await cookies();
+    const session = await parseSessionCookie(cookieHeaderFromStore(store));
+    if (session?.role === "user" && mongoose.isValidObjectId(session.subject)) {
+      await connectMongo();
+      const user = await User.findById(session.subject, { wishlist: 1 }).lean();
+      const raw = Array.isArray((user as any)?.wishlist) ? (user as any).wishlist : [];
+      wishSet = new Set(raw.map((id: any) => String(id)).filter(Boolean));
+    }
+  } catch { }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const nextPage = pageNum < totalPages ? pageNum + 1 : null;
@@ -133,6 +157,7 @@ export default async function PropertiesPage({
         ) : (
           <section className="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((p) => {
+              const id = String((p as any)._id ?? "");
               const slug = String((p as any).slug ?? "");
               const title = String((p as any).title ?? "");
               const city = String((p as any).city ?? "");
@@ -159,6 +184,11 @@ export default async function PropertiesPage({
                     <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-zinc-800 backdrop-blur">
                       AVAILABLE
                     </div>
+                    {id ? (
+                      <div className="absolute right-4 top-4">
+                        <WishlistButton propertyId={id} initialActive={wishSet.has(id)} />
+                      </div>
+                    ) : null}
                   </div>
                   <div className="space-y-2 p-5">
                     <div className="text-base font-semibold tracking-tight text-zinc-900">{title}</div>

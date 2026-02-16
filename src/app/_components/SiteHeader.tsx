@@ -114,6 +114,13 @@ export default function SiteHeader({ accent }: { accent: string }) {
                 <div className="h-px bg-zinc-100" />
                 <div className="p-2">
                   <Link
+                    href="/account/wishlist"
+                    onClick={() => setMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
+                  >
+                    Wishlist
+                  </Link>
+                  <Link
                     href="/contact"
                     onClick={() => setMenuOpen(false)}
                     className="block rounded-xl px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"

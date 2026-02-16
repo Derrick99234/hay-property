@@ -31,3 +31,14 @@ export function isMongoDuplicateKeyError(err: unknown) {
   const code = (err as { code?: unknown }).code;
   return code === 11000;
 }
+
+export function slugify(input: string) {
+  const base = input
+    .trim()
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return base;
+}

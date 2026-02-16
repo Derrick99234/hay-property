@@ -3,9 +3,21 @@ import mongoose from "mongoose";
 import { connectMongo } from "../../../../lib/mongodb";
 import { Property } from "../../../../models/Property";
 import { isAdmin } from "../../_lib/auth";
-import { isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody } from "../../_lib/http";
+import { isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../../_lib/http";
 
 export const runtime = "nodejs";
+
+async function ensureUniqueSlug(base: string, excludeId: unknown) {
+  const safeBase = slugify(base);
+  if (!safeBase) return "";
+  let candidate = safeBase;
+  for (let i = 2; i < 50; i++) {
+    const exists = await Property.exists({ slug: candidate, _id: { $ne: excludeId } });
+    if (!exists) return candidate;
+    candidate = `${safeBase}-${i}`;
+  }
+  return `${safeBase}-${Date.now().toString(36)}`;
+}
 
 function getParam(params: { id?: string }) {
   return params.id ?? "";
@@ -60,9 +72,26 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       createdById?: string;
     }>(req);
 
+    const query = mongoose.isValidObjectId(id) ? { _id: id } : { slug: id.toLowerCase() };
+    const existing = await Property.findOne(query, { _id: 1, title: 1 }).lean();
+    if (!existing) return jsonError("Not found.", { status: 404 });
+
     const update: Record<string, unknown> = {};
-    if (typeof body.title === "string") update.title = body.title.trim();
-    if (typeof body.slug === "string") update.slug = body.slug.trim().toLowerCase();
+    const nextTitle = typeof body.title === "string" ? body.title.trim() : undefined;
+    if (typeof nextTitle === "string") update.title = nextTitle;
+
+    if (typeof body.slug === "string") {
+      const nextSlug = await ensureUniqueSlug(body.slug, (existing as any)._id);
+      if (!nextSlug || nextSlug.length < 2) return jsonError("Invalid slug.", { status: 400 });
+      update.slug = nextSlug;
+    } else if (typeof nextTitle === "string") {
+      const prevTitle = String((existing as any).title ?? "");
+      if (nextTitle !== prevTitle) {
+        const nextSlug = await ensureUniqueSlug(nextTitle, (existing as any)._id);
+        if (!nextSlug || nextSlug.length < 2) return jsonError("Invalid slug.", { status: 400 });
+        update.slug = nextSlug;
+      }
+    }
     if (typeof body.description === "string") update.description = body.description;
     if (typeof body.price === "number") update.price = body.price;
     if (typeof body.currency === "string") update.currency = body.currency;
@@ -89,8 +118,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       update.location = { type: "Point", coordinates: [body.lng, body.lat] };
     }
 
-    const query = mongoose.isValidObjectId(id) ? { _id: id } : { slug: id.toLowerCase() };
-    const doc = await Property.findOneAndUpdate(query, update, { new: true, runValidators: true })
+    const doc = await Property.findByIdAndUpdate((existing as any)._id, update, { new: true, runValidators: true })
       .populate("createdBy", "email name")
       .lean();
     if (!doc) return jsonError("Not found.", { status: 404 });

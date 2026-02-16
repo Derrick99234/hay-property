@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (password.length < 6) return jsonError("Password must be at least 6 characters.", { status: 400 });
 
     const passwordHash = await hashPassword(password);
-    const created = await User.create({ email, name, passwordHash, status: "ACTIVE" });
+    const created = await User.create({ email, name, passwordHash, status: "ACTIVE", wishlist: [] });
 
     const res = NextResponse.json({ ok: true, data: created.toJSON() }, { status: 201 });
     setSession(res, { role: "user", subject: String((created as { _id: unknown })._id) });
@@ -35,4 +35,3 @@ export async function POST(req: NextRequest) {
     return jsonError("Failed to register.", { status: 500 });
   }
 }
-
