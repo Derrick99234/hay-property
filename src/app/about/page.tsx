@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -9,10 +9,9 @@ import SiteFooter from "../_components/SiteFooter";
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1600&q=80";
-const ACCOLADES_BG =
-  "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=2000&q=80";
+const HERO_IMAGE = "/hay property about page.jpg";
+// const HERO_IMAGE = "https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1600&q=80";
+const ACCOLADES_BG = "/hay property team accolades.jpg";
 
 const TEAM = [
   {
@@ -81,7 +80,7 @@ function useRevealOnScroll() {
           io.disconnect();
         }
       },
-      { threshold: 0.18, rootMargin: "0px 0px -10% 0px" }
+      { threshold: 0.18, rootMargin: "0px 0px -10% 0px" },
     );
 
     io.observe(el);
@@ -105,11 +104,17 @@ function Reveal({
   return (
     <div
       ref={ref}
-      style={reducedMotion ? undefined : { transitionDelay: `${delayMs ?? 0}ms` }}
+      style={
+        reducedMotion ? undefined : { transitionDelay: `${delayMs ?? 0}ms` }
+      }
       className={[
         "transform-gpu will-change-transform",
-        reducedMotion ? "" : "transition-[opacity,transform] duration-700 ease-out",
-        visible || reducedMotion ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6",
+        reducedMotion
+          ? ""
+          : "transition-[opacity,transform] duration-700 ease-out",
+        visible || reducedMotion
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-6",
         className ?? "",
       ].join(" ")}
     >
@@ -157,41 +162,47 @@ export default function AboutPage() {
     };
   }, [reducedMotion]);
 
-  const sectionGap = useMemo(() => "space-y-20 sm:space-y-24", []);
-
   return (
     <div className="min-h-screen bg-white text-zinc-900">
-      <div className="mx-auto w-full max-w-7xl px-5 pb-14 pt-8 sm:px-10 lg:px-16">
+      <div className="mx-auto w-full max-w-380 px-5 pb-14 pt-8 sm:px-10 lg:px-16">
         <SiteHeader accent={ACCENT} />
 
-        <main className={[sectionGap, "pb-6"].join(" ")}>
+        <main className={"space-y-20 sm:space-y-24 pb-6"}>
           <Reveal>
-            <section className="grid gap-10 lg:grid-cols-[1fr_520px] lg:items-start">
+            <section className="grid gap-10 lg:grid-cols-[1fr_520px] lg:items-center">
               <div className="space-y-7 pt-2">
                 <div className="space-y-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.34em] text-zinc-500">About us</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.34em] text-zinc-500">
+                    About us
+                  </p>
                   <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
                     Meet HayProperty Development
                   </h1>
-                  <p className="max-w-xl text-sm leading-7 text-zinc-600">
-                    Hay Property Ltd. is a forward-thinking real estate development company based in Lagos, Nigeria—committed
-                    to transparency, strategic land acquisition, and long-term value creation. Incorporated in 2022, we
-                    provide trusted investment opportunities across residential, agricultural, land banking, and commercial
-                    developments.
+                  <p className="text-sm leading-7 text-zinc-600">
+                    Hay Property Ltd. is a forward-thinking real estate
+                    development company based in Lagos, Nigeria—committed to
+                    transparency, strategic land acquisition, and long-term
+                    value creation. Incorporated in 2022, we provide trusted
+                    investment opportunities across residential, agricultural,
+                    land banking, and commercial developments.
                   </p>
                 </div>
 
                 <div className="space-y-4 text-sm leading-7 text-zinc-600">
                   <p>
-                    We believe landownership should be more than a purchase—it should be a pathway to growth, stability, and
-                    generational wealth. Our projects combine affordability, premium locations, verified documentation, and
-                    sustainable community planning, helping clients secure plots you can trust.
+                    We believe landownership should be more than a purchase—it
+                    should be a pathway to growth, stability, and generational
+                    wealth. Our projects combine affordability, premium
+                    locations, verified documentation, and sustainable community
+                    planning, helping clients secure plots you can trust.
                   </p>
                   <p>
-                    Our mission is to transform land ownership into a platform for wealth creation through agriculture,
-                    recreation, leasing opportunities, and modern development. We deliver legally documented projects at
-                    accessible prices—ensuring transparency, instant allocation, and positive impact for investors and the
-                    communities we serve.
+                    Our mission is to transform land ownership into a platform
+                    for wealth creation through agriculture, recreation, leasing
+                    opportunities, and modern development. We deliver legally
+                    documented projects at accessible prices—ensuring
+                    transparency, instant allocation, and positive impact for
+                    investors and the communities we serve.
                   </p>
                 </div>
 
@@ -199,7 +210,10 @@ export default function AboutPage() {
                   <Link
                     href="/contact"
                     className="inline-flex h-11 items-center justify-center rounded-full px-7 text-[11px] font-semibold uppercase tracking-[0.24em] text-white shadow-sm transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                    style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+                    style={{
+                      backgroundColor: ACCENT,
+                      boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+                    }}
                   >
                     Contact us
                   </Link>
@@ -212,7 +226,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="group relative overflow-hidden rounded-[28px] bg-zinc-200 shadow-sm ring-1 ring-zinc-100">
+              <div className="group relative overflow-hidden bg-zinc-200 shadow-sm ring-1 ring-zinc-100">
                 <Image
                   src={HERO_IMAGE}
                   alt="Hay Property team"
@@ -228,8 +242,14 @@ export default function AboutPage() {
           </Reveal>
 
           <Reveal delayMs={80}>
-            <section ref={parallaxWrapRef} className="relative overflow-hidden rounded-[28px] bg-[#0f1730]">
-              <div ref={parallaxLayerRef} className="absolute inset-0 transform-gpu will-change-transform">
+            <section
+              ref={parallaxWrapRef}
+              className="relative overflow-hidden h-150 bg-[#0f1730] flex justify-center items-center"
+            >
+              <div
+                ref={parallaxLayerRef}
+                className="absolute inset-0 transform-gpu will-change-transform"
+              >
                 <Image
                   src={ACCOLADES_BG}
                   alt="Team accolades"
@@ -240,10 +260,10 @@ export default function AboutPage() {
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <div className="absolute inset-0 bg-[#0f1730]/70" />
-              <div className="relative px-6 py-12 sm:px-10 sm:py-14">
+              <div className="absolute inset-0 bg-[#0f1730]/50" />
+              <div className="relative px-6 py-12 sm:px-10 sm:py-14 bg-[#0f1730]/80">
                 <div className="text-center">
-                  <p className="text-xs font-semibold uppercase tracking-[0.30em] text-white/70">Team accolades</p>
+                  <p className="text-lg text-white/70">Team accolades</p>
                 </div>
 
                 <div className="mt-10 grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-3">
@@ -261,11 +281,15 @@ export default function AboutPage() {
           <Reveal delayMs={120}>
             <section className="space-y-10">
               <div className="space-y-4 text-center">
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-zinc-500">Our team</p>
-                <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">Hay Team</h2>
+                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-zinc-500">
+                  Our team
+                </p>
+                <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+                  Hay Team
+                </h2>
                 <p className="mx-auto max-w-2xl text-sm leading-7 text-zinc-600">
-                  Our team is made up of passionate professionals dedicated to making landownership secure, accessible, and
-                  rewarding.
+                  Our team is made up of passionate professionals dedicated to
+                  making landownership secure, accessible, and rewarding.
                 </p>
               </div>
 
@@ -286,7 +310,9 @@ export default function AboutPage() {
                       <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
                     </div>
                     <div className="space-y-1 px-5 py-5 text-center">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-900">{t.name}</div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-900">
+                        {t.name}
+                      </div>
                       <div className="text-xs text-zinc-500">{t.role}</div>
                     </div>
                   </div>
@@ -297,7 +323,10 @@ export default function AboutPage() {
                 <Link
                   href="/contact"
                   className="inline-flex h-11 items-center justify-center rounded-full px-7 text-[11px] font-semibold uppercase tracking-[0.24em] text-white shadow-sm transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                  style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+                  style={{
+                    backgroundColor: ACCENT,
+                    boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+                  }}
                 >
                   Contact us
                 </Link>
@@ -315,8 +344,10 @@ export default function AboutPage() {
 function Accolade({ value, label }: { value: string; label: string }) {
   return (
     <div className="space-y-2">
-      <div className="text-2xl font-semibold tracking-tight text-white">{value}</div>
-      <div className="mx-auto max-w-[260px] text-[10px] font-semibold uppercase tracking-[0.26em] text-white/70">
+      <div className="text-3xl md:text-4xl font-semibold tracking-tight text-white">
+        {value}
+      </div>
+      <div className="mx-auto max-w-[260px] text-[10px] font-semibold uppercase text-white/70">
         {label}
       </div>
     </div>

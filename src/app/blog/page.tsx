@@ -4,6 +4,7 @@ import { Blog } from "../../models/Blog";
 import { pickBlogImage } from "../../lib/unsplash";
 import NewsletterForm from "../_components/NewsletterForm";
 import SiteHeader from "../_components/SiteHeader";
+import Image from "next/image";
 
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
@@ -22,7 +23,11 @@ type Post = {
 export const revalidate = 30;
 
 function formatDateLabel(value: Date) {
-  return value.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  return value.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
 }
 
 function estimateReadTime(text: string) {
@@ -47,25 +52,42 @@ export default async function BlogPage({
     await connectMongo();
     const filter: Record<string, unknown> = { published: true };
     if (activeCategory) filter.category = activeCategory;
-    docs = await Blog.find(filter, null, { sort: { publishedAt: -1, createdAt: -1 }, limit: 30 }).lean();
+    docs = await Blog.find(filter, null, {
+      sort: { publishedAt: -1, createdAt: -1 },
+      limit: 30,
+    }).lean();
   } catch {
     docs = [];
   }
   const posts: Post[] = docs.map((d) => {
     const title = String((d as any).title ?? "");
-    const excerpt = String((d as any).excerpt ?? "").trim() || String((d as any).content ?? "").slice(0, 160).trim();
+    const excerpt =
+      String((d as any).excerpt ?? "").trim() ||
+      String((d as any).content ?? "")
+        .slice(0, 160)
+        .trim();
     const category = String((d as any).category ?? "Insights");
     const dateSrc = (d as any).publishedAt ?? (d as any).createdAt;
     const date = formatDateLabel(new Date(dateSrc));
-    const coverUrl = String((d as any).coverUrl ?? "").trim() || fallbackCoverUrl(String((d as any).slug ?? ""));
+    const coverUrl =
+      String((d as any).coverUrl ?? "").trim() ||
+      fallbackCoverUrl(String((d as any).slug ?? ""));
     const readTime = estimateReadTime(String((d as any).content ?? excerpt));
-    return { slug: String((d as any).slug ?? ""), title, excerpt, category, date, readTime, coverUrl };
+    return {
+      slug: String((d as any).slug ?? ""),
+      title,
+      excerpt,
+      category,
+      date,
+      readTime,
+      coverUrl,
+    };
   });
 
   const featured = posts[0];
   const rest = posts.slice(1);
 
-  const categories = ["All", "Land", "Documents", "Guide", "Insights"];
+  const categories = ["All", "Investing", "Market", "Guides", "Tips"];
 
   return (
     <div className="min-h-screen bg-[#eef1f5] text-zinc-900">
@@ -74,7 +96,20 @@ export default async function BlogPage({
 
         <main className="pb-16">
           <section className="relative overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-zinc-100">
-            <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_20%_30%,rgba(242,85,93,0.10),transparent),radial-gradient(900px_520px_at_85%_70%,rgba(29,43,86,0.10),transparent)]" />
+            <div className="absolute inset-0 transform-gpu will-change-transform">
+              <Image
+                src={
+                  "https://images.unsplash.com/photo-1519337265831-281ec6cc8514?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                }
+                alt="Blog Page"
+                className="h-full w-full object-cover"
+                width={2000}
+                height={1200}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_80%_50%,rgba(242,85,93,0.10),transparent),radial-gradient(900px_520px_at_85%_70%,rgba(29,43,86,0.10))]" />
             <div className="relative grid gap-10 px-7 py-10 sm:px-10 sm:py-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
               <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700">
@@ -85,10 +120,10 @@ export default async function BlogPage({
                   />
                   Latest articles
                 </div>
-                <h1 className="text-3xl font-semibold leading-tight tracking-tight text-zinc-900 sm:text-4xl">
+                <h1 className="text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
                   Simple insights for smarter property decisions.
                 </h1>
-                <p className="max-w-xl text-sm leading-7 text-zinc-600 sm:text-base">
+                <p className="max-w-xl text-sm leading-7 text-white sm:text-base">
                   Learn how to buy land, understand documents, and invest with
                   confidence—clear explanations, practical tips, and short
                   guides.
@@ -127,7 +162,9 @@ export default async function BlogPage({
               </div>
 
               <div className="relative overflow-hidden rounded-[22px] bg-zinc-200">
-                {featured ? <Media src={featured.coverUrl} alt={featured.title} /> : null}
+                {featured ? (
+                  <Media src={featured.coverUrl} alt={featured.title} />
+                ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/20 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 right-5 rounded-2xl bg-white/85 p-4 backdrop-blur">
                   <div className="flex items-center justify-between gap-4">
@@ -173,7 +210,9 @@ export default async function BlogPage({
                     <CategoryPill
                       key={c}
                       category={c}
-                      active={c === "All" ? !activeCategory : activeCategory === c}
+                      active={
+                        c === "All" ? !activeCategory : activeCategory === c
+                      }
                     />
                   ))}
                 </div>
@@ -267,7 +306,9 @@ export default async function BlogPage({
           </div>
 
           <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/55">
-            <div>© {new Date().getFullYear()} HAY Property. All rights reserved.</div>
+            <div>
+              © {new Date().getFullYear()} HAY Property. All rights reserved.
+            </div>
             <div className="flex items-center gap-4">
               <Link className="hover:text-white" href="/privacy-policy">
                 Privacy policy
@@ -283,16 +324,20 @@ export default async function BlogPage({
   );
 }
 
-function CategoryPill({ category, active }: { category: string; active?: boolean }) {
+function CategoryPill({
+  category,
+  active,
+}: {
+  category: string;
+  active?: boolean;
+}) {
   const href =
-    category === "All"
-      ? "/blog"
-      : { pathname: "/blog", query: { category } };
+    category === "All" ? "/blog" : { pathname: "/blog", query: { category } };
   return (
     <Link
       href={href}
       className={[
-        "h-9 rounded-full px-4 text-xs font-semibold transition",
+        "h-9 flex justify-center items-center rounded-full px-4 text-xs font-semibold transition",
         active ? "text-white" : "text-zinc-700 hover:text-zinc-900",
       ].join(" ")}
       style={
@@ -322,7 +367,10 @@ function FeaturedCard({ post }: { post: Post }) {
       <div className="space-y-3 p-6">
         <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-zinc-500">
           <span>{post.date}</span>
-          <span className="size-1 rounded-full bg-zinc-300" aria-hidden="true" />
+          <span
+            className="size-1 rounded-full bg-zinc-300"
+            aria-hidden="true"
+          />
           <span>{post.readTime}</span>
         </div>
         <h3 className="text-xl font-semibold tracking-tight text-zinc-900">
@@ -397,7 +445,10 @@ function PostCard({ post }: { post: Post }) {
       <div className="space-y-3 p-5">
         <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-zinc-500">
           <span>{post.date}</span>
-          <span className="size-1 rounded-full bg-zinc-300" aria-hidden="true" />
+          <span
+            className="size-1 rounded-full bg-zinc-300"
+            aria-hidden="true"
+          />
           <span>{post.readTime}</span>
         </div>
         <h3 className="text-base font-semibold tracking-tight text-zinc-900">

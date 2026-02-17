@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { IconArrowUpRight, IconPin } from "../icons";
+import Image from "next/image";
 
 export function MediaPlaceholder({ variant }: { variant?: "card" | "wide" }) {
   return (
@@ -22,6 +23,7 @@ export function PropertyCard({
   showBrand,
   imageUrl,
   accent,
+  href,
 }: {
   title: string;
   location: string;
@@ -29,17 +31,20 @@ export function PropertyCard({
   showBrand?: boolean;
   imageUrl?: string;
   accent: string;
+  href?: string;
 }) {
   return (
     <Link
-      href="/properties"
+      href={href ?? "/properties"}
       className="relative overflow-hidden rounded-[22px] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="relative h-44 overflow-hidden rounded-[22px] bg-zinc-200">
+      <div className="relative h-100 overflow-hidden rounded-[22px] bg-zinc-200">
         {imageUrl ? (
-          <img
+          <Image
             src={imageUrl}
             alt={title}
+            width={400}
+            height={300}
             className="absolute inset-0 h-full w-full object-cover"
             loading="lazy"
             referrerPolicy="no-referrer"
@@ -86,21 +91,25 @@ export function WidePropertyCard({
   price,
   imageUrl,
   accent,
+  href,
 }: {
   title: string;
   location: string;
   price: string;
   imageUrl?: string;
   accent: string;
+  href?: string;
 }) {
   return (
     <Link
-      href="/properties"
+      href={href ?? "/properties"}
       className="relative overflow-hidden rounded-[22px] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="relative h-44 overflow-hidden rounded-[22px] bg-zinc-200 md:h-52">
+      <div className="relative h-44 overflow-hidden rounded-[22px] bg-zinc-200 md:h-72">
         {imageUrl ? (
-          <img
+          <Image
+            width={600}
+            height={400}
             src={imageUrl}
             alt={title}
             className="absolute inset-0 h-full w-full object-cover"
