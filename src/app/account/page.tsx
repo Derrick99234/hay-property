@@ -4,8 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import SiteFooter from "../_components/SiteFooter";
 
 const ACCENT = "#f2555d";
+const NAVY = "#1d2b56";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -191,6 +193,7 @@ export default function AccountPage() {
           )}
         </div>
       </div>
+      <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );
 }

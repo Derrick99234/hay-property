@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
+import SiteFooter from "../_components/SiteFooter";
 
 const ACCENT = "#f2555d";
+const NAVY = "#1d2b56";
 
 export const metadata = {
   title: "Terms of Service | HAY Property",
@@ -88,6 +90,7 @@ export default function TermsPage() {
           </div>
         </div>
       </div>
+      <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );
 }

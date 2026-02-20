@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import SiteFooter from "../_components/SiteFooter";
 
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
@@ -79,6 +80,7 @@ export default function ContactPage() {
           </div>
         </section>
       </div>
+      <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );
 }

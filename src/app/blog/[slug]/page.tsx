@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { connectMongo } from "../../../lib/mongodb";
 import { Blog } from "../../../models/Blog";
 import { pickBlogImage } from "../../../lib/unsplash";
+import SiteFooter from "../../_components/SiteFooter";
+
+const ACCENT = "#f2555d";
+const NAVY = "#1d2b56";
 
 export const revalidate = 30;
 
@@ -97,6 +101,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         </div>
       </div>
+      <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );
 }

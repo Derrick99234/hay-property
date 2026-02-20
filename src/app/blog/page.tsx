@@ -2,9 +2,9 @@ import Link from "next/link";
 import { connectMongo } from "../../lib/mongodb";
 import { Blog } from "../../models/Blog";
 import { pickBlogImage } from "../../lib/unsplash";
-import NewsletterForm from "../_components/NewsletterForm";
 import SiteHeader from "../_components/SiteHeader";
 import Image from "next/image";
+import SiteFooter from "../_components/SiteFooter";
 
 const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
@@ -236,90 +236,7 @@ export default async function BlogPage({
           </section>
         </main>
       </div>
-
-      <footer className="text-white" style={{ backgroundColor: NAVY }}>
-        <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-10 lg:px-16">
-          <div className="grid gap-10 md:grid-cols-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <LogoMark inverted />
-                <div className="text-sm font-semibold tracking-tight">
-                  HAY Property
-                </div>
-              </div>
-              <p className="max-w-sm text-sm leading-6 text-white/75">
-                Explore verified property opportunities with guidance you can
-                trust—from first inquiry to final allocation.
-              </p>
-
-              <div className="space-y-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-white/65">
-                  Subscribe to follow
-                </div>
-                <NewsletterForm source="footer-blog" />
-              </div>
-            </div>
-
-            <FooterCol title="Category">
-              <FooterLink href="/properties">Properties</FooterLink>
-              <FooterLink href="/about">About</FooterLink>
-              <FooterLink href="/blog">Blog</FooterLink>
-              <FooterLink href="/contact">Contact</FooterLink>
-            </FooterCol>
-
-            <FooterCol title="Contact">
-              <div className="space-y-3 text-sm text-white/80">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-full bg-white/10">
-                    <IconPin className="text-white" />
-                  </span>
-                  <span>Ajah (Lagos), Nigeria</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-full bg-white/10">
-                    <IconMail />
-                  </span>
-                  <span>info@hayproperties.com</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-full bg-white/10">
-                    <IconPhone />
-                  </span>
-                  <span>+234 8000000000</span>
-                </div>
-              </div>
-            </FooterCol>
-
-            <FooterCol title="Follow">
-              <div className="flex items-center gap-3">
-                <SocialIcon href="https://x.com" ariaLabel="X">
-                  <IconX />
-                </SocialIcon>
-                <SocialIcon href="https://instagram.com" ariaLabel="Instagram">
-                  <IconInstagram />
-                </SocialIcon>
-                <SocialIcon href="https://linkedin.com" ariaLabel="LinkedIn">
-                  <IconLinkedIn />
-                </SocialIcon>
-              </div>
-            </FooterCol>
-          </div>
-
-          <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/55">
-            <div>
-              © {new Date().getFullYear()} HAY Property. All rights reserved.
-            </div>
-            <div className="flex items-center gap-4">
-              <Link className="hover:text-white" href="/privacy-policy">
-                Privacy policy
-              </Link>
-              <Link className="hover:text-white" href="/terms">
-                Terms
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );
 }

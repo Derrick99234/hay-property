@@ -6,7 +6,7 @@ import { connectMongo } from "../../lib/mongodb";
 import { Property } from "../../models/Property";
 import { User } from "../../models/User";
 import { pickHeroImage, pickPropertyImage } from "../../lib/unsplash";
-import NewsletterForm from "../_components/NewsletterForm";
+import SiteFooter from "../_components/SiteFooter";
 import WishlistButton from "../_components/WishlistButton";
 import { parseSessionCookie } from "../auth/_lib/session";
 
@@ -218,28 +218,7 @@ export default async function PropertiesPage({
           </div>
         ) : null}
       </main>
-
-      <footer className="text-white" style={{ backgroundColor: NAVY }}>
-        <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-10 lg:px-16">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Image src="/logo/logo1.png" alt="HAY Property" width={140} height={72} />
-            </div>
-            <div className="text-sm text-white/75">© {new Date().getFullYear()} HAY Property</div>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-            <NewsletterForm source="footer-properties" className="w-full max-w-md" />
-            <div className="flex items-center gap-4 text-xs text-white/70">
-              <Link className="hover:text-white" href="/privacy-policy">
-                Privacy policy
-              </Link>
-              <Link className="hover:text-white" href="/terms">
-                Terms
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );
 }

@@ -7,9 +7,11 @@ import { Property } from "../../../models/Property";
 import { User } from "../../../models/User";
 import { pickPropertyImage } from "../../../lib/unsplash";
 import WishlistButton from "../../_components/WishlistButton";
+import SiteFooter from "../../_components/SiteFooter";
 import { parseSessionCookie } from "../../auth/_lib/session";
 
 const ACCENT = "#f2555d";
+const NAVY = "#1d2b56";
 
 export const revalidate = 30;
 
@@ -163,6 +165,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
           </div>
         </div>
       </div>
+      <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );
 }
