@@ -157,7 +157,7 @@ export default function SiteHeader({ accent }: { accent: string }) {
 
         <Link
           href="/contact"
-          className="rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
+          className="rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 hidden md:inline-block"
           style={{ backgroundColor: accent, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
           Book Inspection
