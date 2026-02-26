@@ -12,8 +12,8 @@ type AdminContextValue = {
   updateUser: (id: string, input: Partial<{ name: string; email: string; password: string; status: AdminUser["status"] }>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
-  createProperty: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; coverUrl: string }) => Promise<void>;
-  updateProperty: (id: string, input: Partial<{ title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; coverUrl: string }>) => Promise<void>;
+  createProperty: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageUrls: string[] }) => Promise<void>;
+  updateProperty: (id: string, input: Partial<{ title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageUrls: string[] }>) => Promise<void>;
   deleteProperty: (id: string) => Promise<void>;
 
   createBlog: (input: Omit<AdminBlog, "id" | "createdAt">) => Promise<void>;
@@ -64,6 +64,7 @@ export default function AdminProvider({
           location: [p.city, p.state].filter(Boolean).join(", ") || String(p.address ?? ""),
           price: Number(p.price ?? 0),
           status: (p.status ?? "DRAFT") as AdminProperty["status"],
+          imageUrls: Array.isArray(p.images) ? p.images.map((i: any) => String(i?.url ?? "").trim()).filter(Boolean) : [],
           createdAt: String(p.createdAt ?? new Date().toISOString()),
         })),
         blogs: blogs.map((b) => ({
@@ -129,7 +130,11 @@ export default function AdminProvider({
           status: input.status,
           city: city || undefined,
           state: state || undefined,
-          images: input.coverUrl ? [{ url: input.coverUrl, order: 0 }] : [],
+          images: Array.isArray(input.imageUrls)
+            ? input.imageUrls
+                .map((url, idx) => ({ url, order: idx }))
+                .filter((img) => typeof img.url === "string" && img.url.trim().length > 0)
+            : [],
         }),
       });
       const data = (await res.json()) as { ok: boolean; error?: string };
@@ -148,7 +153,11 @@ export default function AdminProvider({
         payload.city = city || undefined;
         payload.state = state || undefined;
       }
-      if (typeof input.coverUrl === "string") payload.images = input.coverUrl ? [{ url: input.coverUrl, order: 0 }] : [];
+      if (Array.isArray(input.imageUrls)) {
+        payload.images = input.imageUrls
+          .map((url, idx) => ({ url, order: idx }))
+          .filter((img) => typeof img.url === "string" && img.url.trim().length > 0);
+      }
 
       const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {
         method: "PATCH",

@@ -13,6 +13,7 @@ export type AdminProperty = {
   location: string;
   price: number;
   status: "DRAFT" | "AVAILABLE" | "SOLD";
+  imageUrls: string[];
   createdAt: string;
 };
 

@@ -68,12 +68,19 @@ export async function POST(req: NextRequest) {
     if (!mongoose.isValidObjectId(createdById)) return jsonError("Invalid createdById.", { status: 400 });
 
     const images = Array.isArray(body.images)
-      ? body.images.map((img) => ({
-          url: String(img.url),
-          alt: typeof img.alt === "string" ? img.alt : undefined,
-          order: typeof img.order === "number" ? img.order : 0,
-        }))
+      ? body.images
+          .map((img) => ({
+            url: String(img.url ?? "").trim(),
+            alt: typeof img.alt === "string" ? img.alt : undefined,
+            order: typeof img.order === "number" ? img.order : 0,
+          }))
+          .filter((img) => img.url.length > 0)
       : [];
+
+    if (images.length > 5) return jsonError("Images must be at most 5.", { status: 400 });
+    if ((body.status ?? "DRAFT") === "AVAILABLE" && images.length < 3) {
+      return jsonError("Images must be at least 3 for AVAILABLE listings.", { status: 400 });
+    }
 
     const location =
       typeof body.lng === "number" && typeof body.lat === "number"

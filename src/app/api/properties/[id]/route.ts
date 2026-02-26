@@ -106,11 +106,22 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }
     if ("metadata" in body) update.metadata = body.metadata;
     if (Array.isArray(body.images)) {
-      update.images = body.images.map((img) => ({
-        url: String(img.url),
-        alt: typeof img.alt === "string" ? img.alt : undefined,
-        order: typeof img.order === "number" ? img.order : 0,
-      }));
+      const images = body.images
+        .map((img) => ({
+          url: String(img.url ?? "").trim(),
+          alt: typeof img.alt === "string" ? img.alt : undefined,
+          order: typeof img.order === "number" ? img.order : 0,
+        }))
+        .filter((img) => img.url.length > 0);
+
+      if (images.length > 5) return jsonError("Images must be at most 5.", { status: 400 });
+
+      const nextStatus = typeof body.status === "string" ? body.status : undefined;
+      if (nextStatus === "AVAILABLE" && images.length < 3) {
+        return jsonError("Images must be at least 3 for AVAILABLE listings.", { status: 400 });
+      }
+
+      update.images = images;
     }
 
     if (body.lat === null || body.lng === null) update.location = undefined;

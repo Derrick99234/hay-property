@@ -60,7 +60,7 @@ export default function AdminPropertiesPage() {
     location: string;
     price: number;
     status: AdminProperty["status"];
-    coverUrl: string;
+    imageUrls: string[];
   }) => {
     try {
       if (editing) await updateProperty(editing.id, input);
@@ -179,14 +179,19 @@ function PropertyForm({
 }: {
   initial: AdminProperty | null;
   onCancel: () => void;
-  onSubmit: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; coverUrl: string }) => void;
+  onSubmit: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageUrls: string[] }) => void;
 }) {
   const initialTitle = initial?.title ?? "";
   const initialSlug = initial?.slug ?? "";
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
-  const [coverUrl, setCoverUrl] = useState("");
+  const [imageUrls, setImageUrls] = useState<string[]>(() => {
+    const seeded = Array.isArray(initial?.imageUrls) ? initial!.imageUrls : [];
+    const cleaned = seeded.map((u) => String(u ?? "").trim()).filter(Boolean).slice(0, 5);
+    while (cleaned.length < 3) cleaned.push("");
+    return cleaned;
+  });
   const [price, setPrice] = useState(initial?.price ? String(initial.price) : "");
   const [status, setStatus] = useState<AdminProperty["status"]>(initial?.status ?? "DRAFT");
 
@@ -204,15 +209,29 @@ function PropertyForm({
   }, [initial, initialSlug, initialTitle, title]);
 
   const parsedPrice = Number(price.replaceAll(",", ""));
+  const cleanedImages = imageUrls.map((u) => u.trim()).filter(Boolean);
   const canSubmit =
-    title.trim().length > 2 && slug.trim().length > 2 && location.trim().length > 2 && Number.isFinite(parsedPrice) && parsedPrice > 0;
+    title.trim().length > 2 &&
+    slug.trim().length > 2 &&
+    location.trim().length > 2 &&
+    Number.isFinite(parsedPrice) &&
+    parsedPrice > 0 &&
+    cleanedImages.length <= 5 &&
+    (status !== "AVAILABLE" || cleanedImages.length >= 3);
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         if (!canSubmit) return;
-        onSubmit({ title: title.trim(), slug: slug.trim().toLowerCase(), location: location.trim(), coverUrl: coverUrl.trim(), price: parsedPrice, status });
+        onSubmit({
+          title: title.trim(),
+          slug: slug.trim().toLowerCase(),
+          location: location.trim(),
+          imageUrls: cleanedImages,
+          price: parsedPrice,
+          status,
+        });
       }}
       className="space-y-4"
     >
@@ -243,13 +262,42 @@ function PropertyForm({
         />
       </Field>
 
-      <Field label="Cover image (Unsplash URL)">
-        <input
-          value={coverUrl}
-          onChange={(e) => setCoverUrl(e.target.value)}
-          className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
-          placeholder="https://images.unsplash.com/..."
-        />
+      <Field label="Images (3–5 URLs)">
+        <div className="space-y-2">
+          {imageUrls.map((u, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <input
+                value={u}
+                onChange={(e) => {
+                  const next = [...imageUrls];
+                  next[idx] = e.target.value;
+                  setImageUrls(next);
+                }}
+                className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+                placeholder={`Image URL ${idx + 1}`}
+              />
+              {imageUrls.length > 3 ? (
+                <button
+                  type="button"
+                  onClick={() => setImageUrls((prev) => prev.filter((_, i) => i !== idx))}
+                  className="h-11 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-900 transition hover:border-zinc-300"
+                >
+                  Remove
+                </button>
+              ) : null}
+            </div>
+          ))}
+          {imageUrls.length < 5 ? (
+            <button
+              type="button"
+              onClick={() => setImageUrls((prev) => [...prev, ""])}
+              className="h-11 rounded-xl border border-zinc-200 bg-white px-5 text-xs font-semibold text-zinc-900 transition hover:border-zinc-300"
+            >
+              Add image
+            </button>
+          ) : null}
+          <div className="text-xs text-zinc-500">{cleanedImages.length}/5 added</div>
+        </div>
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
