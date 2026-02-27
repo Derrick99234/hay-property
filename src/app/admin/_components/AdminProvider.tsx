@@ -16,8 +16,16 @@ type AdminContextValue = {
   updateProperty: (id: string, input: Partial<{ title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageFiles: File[] }>) => Promise<void>;
   deleteProperty: (id: string) => Promise<void>;
 
-  createBlog: (input: Omit<AdminBlog, "id" | "createdAt">) => Promise<void>;
-  updateBlog: (id: string, input: Partial<Omit<AdminBlog, "id">>) => Promise<void>;
+  createBlog: (input: {
+    title: string;
+    slug: string;
+    category: string;
+    excerpt: string;
+    content: string;
+    published: boolean;
+    coverFile?: File | null;
+  }) => Promise<void>;
+  updateBlog: (id: string, input: Partial<Omit<AdminBlog, "id">> & { coverFile?: File | null }) => Promise<void>;
   deleteBlog: (id: string) => Promise<void>;
 };
 
@@ -101,6 +109,19 @@ export default function AdminProvider({
       return imgs
         .map((img) => ({ url: String(img.url ?? "").trim(), order: Number(img.order ?? 0) }))
         .filter((img) => img.url.length > 0);
+    };
+
+    const uploadBlogCover = async (blogId: string, file: File) => {
+      const fd = new FormData();
+      fd.set("blogId", blogId);
+      fd.set("cover", file);
+
+      const res = await fetch("/api/uploads/blog-covers", { method: "POST", body: fd });
+      const data = (await res.json()) as { ok: boolean; data?: { url?: string }; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to upload cover image.");
+      const url = String(data.data?.url ?? "").trim();
+      if (!url) throw new Error("Failed to upload cover image.");
+      return url;
     };
 
     const createUser: AdminContextValue["createUser"] = async (input) => {
@@ -207,21 +228,43 @@ export default function AdminProvider({
     };
 
     const createBlog: AdminContextValue["createBlog"] = async (input) => {
+      const { coverFile, ...rest } = input;
       const res = await fetch("/api/blogs", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...rest, coverUrl: undefined }),
       });
-      const data = (await res.json()) as { ok: boolean; error?: string };
+      const data = (await res.json()) as { ok: boolean; error?: string; data?: any };
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to create blog.");
+
+      const createdId = String(data.data?._id ?? data.data?.id ?? "");
+      if (!createdId) throw new Error("Failed to create blog.");
+
+      if (coverFile) {
+        const coverUrl = await uploadBlogCover(createdId, coverFile);
+        const patchRes = await fetch(`/api/blogs/${encodeURIComponent(createdId)}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ coverUrl }),
+        });
+        const patchData = (await patchRes.json()) as { ok: boolean; error?: string };
+        if (!patchRes.ok || !patchData.ok) throw new Error(patchData.error || "Failed to set cover image.");
+      }
       await refresh();
     };
 
     const updateBlog: AdminContextValue["updateBlog"] = async (id, input) => {
+      const { coverFile, ...rest } = input;
+      const payload = { ...rest } as Record<string, unknown>;
+
+      if (coverFile) {
+        const coverUrl = await uploadBlogCover(id, coverFile);
+        payload.coverUrl = coverUrl;
+      }
       const res = await fetch(`/api/blogs/${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(input),
+        body: JSON.stringify(payload),
       });
       const data = (await res.json()) as { ok: boolean; error?: string };
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to update blog.");

@@ -58,7 +58,15 @@ export default function AdminBlogsPage() {
     }
   };
 
-  const onSubmit = async (input: Omit<AdminBlog, "id" | "createdAt">) => {
+  const onSubmit = async (input: {
+    title: string;
+    slug: string;
+    category: string;
+    excerpt: string;
+    content: string;
+    published: boolean;
+    coverFile?: File | null;
+  }) => {
     try {
       if (editing) await updateBlog(editing.id, input);
       else await createBlog(input);
@@ -192,7 +200,15 @@ function BlogForm({
 }: {
   initial: AdminBlog | null;
   onCancel: () => void;
-  onSubmit: (input: Omit<AdminBlog, "id" | "createdAt">) => void;
+  onSubmit: (input: {
+    title: string;
+    slug: string;
+    category: string;
+    excerpt: string;
+    content: string;
+    published: boolean;
+    coverFile?: File | null;
+  }) => void;
 }) {
   const initialTitle = initial?.title ?? "";
   const initialSlug = initial?.slug ?? "";
@@ -200,7 +216,7 @@ function BlogForm({
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [category, setCategory] = useState(initial?.category ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
-  const [coverUrl, setCoverUrl] = useState(initial?.coverUrl ?? "");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [content, setContent] = useState(initial?.content ?? "");
   const [published, setPublished] = useState(initial?.published ?? false);
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>([]);
@@ -255,7 +271,15 @@ function BlogForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!canSubmit) return;
-        onSubmit({ title: title.trim(), slug: slug.trim().toLowerCase(), category: category.trim(), excerpt: excerpt.trim(), coverUrl: coverUrl.trim(), content: content.trim(), published });
+        onSubmit({
+          title: title.trim(),
+          slug: slug.trim().toLowerCase(),
+          category: category.trim(),
+          excerpt: excerpt.trim(),
+          content: content.trim(),
+          published,
+          coverFile,
+        });
       }}
       className="space-y-4"
     >
@@ -329,13 +353,16 @@ function BlogForm({
         </Field>
       </div>
 
-      <Field label="Cover image (Unsplash URL)">
-        <input
-          value={coverUrl}
-          onChange={(e) => setCoverUrl(e.target.value)}
-          className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
-          placeholder="https://images.unsplash.com/..."
-        />
+      <Field label={initial?.coverUrl ? "Cover image (replace file)" : "Cover image (optional file)"}>
+        <div className="space-y-2">
+          {initial?.coverUrl ? <div className="text-xs text-zinc-500">Current cover: set</div> : null}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => setCoverFile((e.target.files?.[0] as File | undefined) ?? null)}
+            className="block w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-zinc-300"
+          />
+        </div>
       </Field>
 
       <Field label="Excerpt">
