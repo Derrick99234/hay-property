@@ -65,7 +65,7 @@ function useRevealOnScroll() {
 
   useEffect(() => {
     if (reducedMotion) {
-      setVisible(true);
+      // No-op: visibility is already handled by the initial state and the IntersectionObserver callback
       return;
     }
     const el = ref.current;

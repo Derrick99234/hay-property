@@ -133,7 +133,11 @@ export default function AccountPage() {
             };
           })
           .filter((p) => p.id && p.property.id && p.property.slug && p.property.title);
-        if (!cancelled) setPurchases(cleaned);
+        if (!cancelled) setPurchases(cleaned as Array<{
+          id: string;
+          property: { id: string; slug: string; title: string; city?: string; state?: string };
+          progress: { percent: number; overallStatus: "COMPLETED" | "ONGOING"; steps: Array<{ label: string; phase: string; status: string }> };
+        }>);
       })
       .catch(() => { })
       .finally(() => {
