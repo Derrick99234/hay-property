@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const publicBase = process.env.R2_PUBLIC_BASE_URL ? new URL(process.env.R2_PUBLIC_BASE_URL).hostname : undefined;
+
 const nextConfig: NextConfig = {
   /* config options here */
 
@@ -23,6 +25,22 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "**.r2.dev",
+        port: "",
+        pathname: "/**",
+      },
+      ...(publicBase
+        ? [
+            {
+              protocol: "https",
+              hostname: publicBase,
+              port: "",
+              pathname: "/**",
+            },
+          ]
+        : []),
     ],
   },
 };

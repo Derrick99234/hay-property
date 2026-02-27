@@ -12,8 +12,8 @@ type AdminContextValue = {
   updateUser: (id: string, input: Partial<{ name: string; email: string; password: string; status: AdminUser["status"] }>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
-  createProperty: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageUrls: string[] }) => Promise<void>;
-  updateProperty: (id: string, input: Partial<{ title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageUrls: string[] }>) => Promise<void>;
+  createProperty: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageFiles: File[] }) => Promise<void>;
+  updateProperty: (id: string, input: Partial<{ title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageFiles: File[] }>) => Promise<void>;
   deleteProperty: (id: string) => Promise<void>;
 
   createBlog: (input: Omit<AdminBlog, "id" | "createdAt">) => Promise<void>;
@@ -89,6 +89,20 @@ export default function AdminProvider({
   }, []);
 
   const value = useMemo<AdminContextValue>(() => {
+    const uploadPropertyImages = async (propertyId: string, files: File[]) => {
+      const fd = new FormData();
+      fd.set("propertyId", propertyId);
+      for (const f of files) fd.append("images", f);
+
+      const res = await fetch("/api/uploads/property-images", { method: "POST", body: fd });
+      const data = (await res.json()) as { ok: boolean; data?: { images?: Array<{ url: string; order: number }> }; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to upload images.");
+      const imgs = Array.isArray(data.data?.images) ? data.data!.images! : [];
+      return imgs
+        .map((img) => ({ url: String(img.url ?? "").trim(), order: Number(img.order ?? 0) }))
+        .filter((img) => img.url.length > 0);
+    };
+
     const createUser: AdminContextValue["createUser"] = async (input) => {
       const res = await fetch("/api/users", {
         method: "POST",
@@ -120,6 +134,8 @@ export default function AdminProvider({
 
     const createProperty: AdminContextValue["createProperty"] = async (input) => {
       const [city, state] = input.location.split(",").map((s) => s.trim());
+      const imageFiles = Array.isArray(input.imageFiles) ? input.imageFiles.slice(0, 5) : [];
+      const finalStatus = input.status;
       const res = await fetch("/api/properties", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -127,18 +143,33 @@ export default function AdminProvider({
           title: input.title,
           slug: input.slug,
           price: input.price,
-          status: input.status,
+          status: "DRAFT",
           city: city || undefined,
           state: state || undefined,
-          images: Array.isArray(input.imageUrls)
-            ? input.imageUrls
-                .map((url, idx) => ({ url, order: idx }))
-                .filter((img) => typeof img.url === "string" && img.url.trim().length > 0)
-            : [],
+          images: [],
         }),
       });
-      const data = (await res.json()) as { ok: boolean; error?: string };
+      const data = (await res.json()) as { ok: boolean; error?: string; data?: any };
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to create property.");
+
+      const createdId = String(data.data?._id ?? data.data?.id ?? "");
+      if (!createdId) throw new Error("Failed to create property.");
+
+      const payload: Record<string, unknown> = {};
+      if (imageFiles.length) {
+        const images = await uploadPropertyImages(createdId, imageFiles);
+        payload.images = images;
+      }
+      payload.status = finalStatus;
+
+      const patchRes = await fetch(`/api/properties/${encodeURIComponent(createdId)}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const patchData = (await patchRes.json()) as { ok: boolean; error?: string };
+      if (!patchRes.ok || !patchData.ok) throw new Error(patchData.error || "Failed to finalize property.");
+
       await refresh();
     };
 
@@ -153,10 +184,9 @@ export default function AdminProvider({
         payload.city = city || undefined;
         payload.state = state || undefined;
       }
-      if (Array.isArray(input.imageUrls)) {
-        payload.images = input.imageUrls
-          .map((url, idx) => ({ url, order: idx }))
-          .filter((img) => typeof img.url === "string" && img.url.trim().length > 0);
+      if (Array.isArray(input.imageFiles) && input.imageFiles.length) {
+        const imageFiles = input.imageFiles.slice(0, 5);
+        payload.images = await uploadPropertyImages(id, imageFiles);
       }
 
       const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {

@@ -73,7 +73,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }>(req);
 
     const query = mongoose.isValidObjectId(id) ? { _id: id } : { slug: id.toLowerCase() };
-    const existing = await Property.findOne(query, { _id: 1, title: 1 }).lean();
+    const existing = await Property.findOne(query, { _id: 1, title: 1, images: 1 }).lean();
     if (!existing) return jsonError("Not found.", { status: 404 });
 
     const update: Record<string, unknown> = {};
@@ -122,6 +122,11 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       }
 
       update.images = images;
+    }
+    const nextStatus = typeof body.status === "string" ? body.status : undefined;
+    if (nextStatus === "AVAILABLE" && !Array.isArray(body.images)) {
+      const existingImages = Array.isArray((existing as any).images) ? (existing as any).images : [];
+      if (existingImages.length < 3) return jsonError("Images must be at least 3 for AVAILABLE listings.", { status: 400 });
     }
 
     if (body.lat === null || body.lng === null) update.location = undefined;
