@@ -31,16 +31,6 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
-      ...(publicBase
-        ? [
-            {
-              protocol: "https",
-              hostname: publicBase,
-              port: "",
-              pathname: "/**",
-            },
-          ]
-        : []),
     ],
   },
 };
