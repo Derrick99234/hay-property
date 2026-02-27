@@ -29,11 +29,33 @@ export type AdminBlog = {
   createdAt: string;
 };
 
+export type AdminPurchaseStep = {
+  key: string;
+  label: string;
+  phase: string;
+  status: "COMPLETED" | "ONGOING" | "PENDING";
+};
+
+export type AdminPurchase = {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  propertyId: string;
+  propertyTitle: string;
+  propertySlug: string;
+  percent: number;
+  overallStatus: "COMPLETED" | "ONGOING";
+  steps: AdminPurchaseStep[];
+  createdAt: string;
+};
+
 export type AdminDB = {
   version: 1;
   users: AdminUser[];
   properties: AdminProperty[];
   blogs: AdminBlog[];
+  purchases: AdminPurchase[];
 };
 
 export const ADMIN_DB_KEY = "hay_admin_db_v1";
@@ -52,6 +74,7 @@ export function createSeedDB(): AdminDB {
     users: [],
     properties: [],
     blogs: [],
+    purchases: [],
   };
 }
 

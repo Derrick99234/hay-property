@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { AdminBlog, AdminDB, AdminProperty, AdminUser, createSeedDB } from "../_lib/adminStore";
+import { AdminBlog, AdminDB, AdminProperty, AdminPurchase, AdminUser, createSeedDB } from "../_lib/adminStore";
 
 type AdminContextValue = {
   db: AdminDB;
@@ -27,6 +27,10 @@ type AdminContextValue = {
   }) => Promise<void>;
   updateBlog: (id: string, input: Partial<Omit<AdminBlog, "id">> & { coverFile?: File | null }) => Promise<void>;
   deleteBlog: (id: string) => Promise<void>;
+
+  createPurchase: (input: { userId: string; propertyId: string }) => Promise<void>;
+  updatePurchaseSteps: (id: string, input: { steps: Record<string, boolean> }) => Promise<void>;
+  deletePurchase: (id: string) => Promise<void>;
 };
 
 const AdminContext = createContext<AdminContextValue | null>(null);
@@ -42,19 +46,22 @@ export default function AdminProvider({
   const refresh = async () => {
     setLoading(true);
     try {
-      const [usersRes, propsRes, blogsRes] = await Promise.all([
+      const [usersRes, propsRes, blogsRes, purchasesRes] = await Promise.all([
         fetch("/api/users?limit=100"),
         fetch("/api/properties?limit=100"),
         fetch("/api/blogs?limit=100"),
+        fetch("/api/purchases?limit=100"),
       ]);
 
       const usersJson = (await usersRes.json()) as { ok: boolean; data?: { items?: any[] } };
       const propsJson = (await propsRes.json()) as { ok: boolean; data?: { items?: any[] } };
       const blogsJson = (await blogsRes.json()) as { ok: boolean; data?: { items?: any[] } };
+      const purchasesJson = (await purchasesRes.json()) as { ok: boolean; data?: { items?: any[] } };
 
       const users = Array.isArray(usersJson.data?.items) ? usersJson.data!.items! : [];
       const properties = Array.isArray(propsJson.data?.items) ? propsJson.data!.items! : [];
       const blogs = Array.isArray(blogsJson.data?.items) ? blogsJson.data!.items! : [];
+      const purchases = Array.isArray(purchasesJson.data?.items) ? purchasesJson.data!.items! : [];
 
       setDB({
         version: 1,
@@ -86,6 +93,42 @@ export default function AdminProvider({
           published: Boolean(b.published),
           createdAt: String(b.createdAt ?? new Date().toISOString()),
         })),
+        purchases: purchases
+          .map((p) => {
+            const id = String(p._id ?? p.id ?? "");
+            const userId = String(p.user?._id ?? p.user ?? "");
+            const userEmail = String(p.user?.email ?? "");
+            const userName = String(p.user?.name ?? "");
+            const propertyId = String(p.property?._id ?? p.property ?? "");
+            const propertyTitle = String(p.property?.title ?? "");
+            const propertySlug = String(p.property?.slug ?? "");
+            const progress = p.progress ?? {};
+            const steps = Array.isArray(progress.steps) ? progress.steps : [];
+            const percent = Number(progress.percent ?? 0);
+            const overallStatus = progress.overallStatus === "COMPLETED" ? "COMPLETED" : "ONGOING";
+            const mapped: AdminPurchase = {
+              id,
+              userId,
+              userEmail,
+              userName,
+              propertyId,
+              propertyTitle,
+              propertySlug,
+              percent: Number.isFinite(percent) ? percent : 0,
+              overallStatus,
+              steps: steps
+                .map((s: any) => ({
+                  key: String(s.key ?? ""),
+                  label: String(s.label ?? ""),
+                  phase: String(s.phase ?? ""),
+                  status: s.status === "COMPLETED" ? "COMPLETED" : s.status === "ONGOING" ? "ONGOING" : "PENDING",
+                }))
+                .filter((s: any) => s.key && s.label),
+              createdAt: String(p.createdAt ?? new Date().toISOString()),
+            };
+            return mapped;
+          })
+          .filter((p: AdminPurchase) => p.id && p.userId && p.propertyId),
       });
     } finally {
       setLoading(false);
@@ -278,6 +321,35 @@ export default function AdminProvider({
       await refresh();
     };
 
+    const createPurchase: AdminContextValue["createPurchase"] = async (input) => {
+      const res = await fetch("/api/purchases", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const data = (await res.json()) as { ok: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to create purchase.");
+      await refresh();
+    };
+
+    const updatePurchaseSteps: AdminContextValue["updatePurchaseSteps"] = async (id, input) => {
+      const res = await fetch(`/api/purchases/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const data = (await res.json()) as { ok: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to update purchase.");
+      await refresh();
+    };
+
+    const deletePurchase: AdminContextValue["deletePurchase"] = async (id) => {
+      const res = await fetch(`/api/purchases/${encodeURIComponent(id)}`, { method: "DELETE" });
+      const data = (await res.json()) as { ok: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to delete purchase.");
+      await refresh();
+    };
+
     return {
       db,
       loading,
@@ -291,6 +363,9 @@ export default function AdminProvider({
       createBlog,
       updateBlog,
       deleteBlog,
+      createPurchase,
+      updatePurchaseSteps,
+      deletePurchase,
     };
   }, [db, loading]);
 
