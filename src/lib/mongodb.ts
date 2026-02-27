@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { registerModels } from "../models/register";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
@@ -9,6 +10,7 @@ if (!MONGODB_URI) {
 let isConnected = false;
 
 export const connectMongo = async () => {
+  registerModels();
   if (isConnected) return;
 
   try {
