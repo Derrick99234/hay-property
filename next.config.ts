@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
 
-const publicBase = process.env.R2_PUBLIC_BASE_URL ? new URL(process.env.R2_PUBLIC_BASE_URL).hostname : undefined;
-
 const nextConfig: NextConfig = {
   /* config options here */
 
