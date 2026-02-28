@@ -9,12 +9,11 @@ import { AdminUser, formatDateShort } from "../../_lib/adminStore";
 const ACCENT = "#f2555d";
 
 export default function AdminUsersPage() {
-  const { db, createUser, updateUser, deleteUser } = useAdminDB();
+  const { db, updateUser } = useAdminDB();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
-  const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -34,33 +33,15 @@ export default function AdminUsersPage() {
 
   const editing = useMemo(() => db.users.find((u) => u.id === editingId) ?? null, [db.users, editingId]);
 
-  const startCreate = () => {
-    setEditingId(null);
-    setOpen(true);
-  };
-
   const startEdit = (id: string) => {
     setEditingId(id);
-    setOpen(true);
   };
 
-  const onDelete = async (id: string) => {
-    if (!window.confirm("Delete this user?")) return;
+  const onSubmit = async (input: { name: string; email: string; status: AdminUser["status"] }) => {
     try {
-      await deleteUser(id);
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Failed to delete user.");
-    }
-  };
-
-  const onSubmit = async (input: { name: string; email: string; password: string; status: AdminUser["status"] }) => {
-    try {
-      if (editing) {
-        await updateUser(editing.id, { name: input.name, email: input.email, status: input.status, password: input.password ? input.password : undefined });
-      } else {
-        await createUser(input);
-      }
-      setOpen(false);
+      if (!editing) return;
+      await updateUser(editing.id, { name: input.name, email: input.email, status: input.status });
+      setEditingId(null);
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Save failed.");
     }
@@ -72,17 +53,8 @@ export default function AdminUsersPage() {
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Admin</p>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Users</h1>
-          <p className="text-sm text-zinc-600">Manage users with pagination and CRUD.</p>
+          <p className="text-sm text-zinc-600">View users and manage status.</p>
         </div>
-
-        <button
-          type="button"
-          onClick={startCreate}
-          className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-          style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
-        >
-          Add user
-        </button>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-zinc-50 p-4 ring-1 ring-zinc-100">
@@ -137,13 +109,6 @@ export default function AdminUsersPage() {
                         >
                           Edit
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => onDelete(u.id)}
-                          className="h-9 rounded-full border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-900 transition hover:border-zinc-300"
-                        >
-                          Delete
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -158,8 +123,8 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      <Modal open={open} title={editing ? "Edit user" : "Add user"} onClose={() => setOpen(false)}>
-        <UserForm initial={editing} onCancel={() => setOpen(false)} onSubmit={onSubmit} />
+      <Modal open={Boolean(editingId)} title="Edit user" onClose={() => setEditingId(null)}>
+        <UserForm initial={editing} onCancel={() => setEditingId(null)} onSubmit={onSubmit} />
       </Modal>
     </div>
   );
@@ -172,21 +137,20 @@ function UserForm({
 }: {
   initial: AdminUser | null;
   onCancel: () => void;
-  onSubmit: (input: { name: string; email: string; password: string; status: AdminUser["status"] }) => void;
+  onSubmit: (input: { name: string; email: string; status: AdminUser["status"] }) => void;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
-  const [password, setPassword] = useState("");
   const [status, setStatus] = useState<AdminUser["status"]>(initial?.status ?? "ACTIVE");
 
-  const canSubmit = name.trim().length > 1 && email.trim().includes("@") && (initial ? true : password.length >= 6);
+  const canSubmit = Boolean(initial) && name.trim().length > 1 && email.trim().includes("@");
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         if (!canSubmit) return;
-        onSubmit({ name: name.trim(), email: email.trim(), status, password });
+        onSubmit({ name: name.trim(), email: email.trim(), status });
       }}
       className="space-y-4"
     >
@@ -205,16 +169,6 @@ function UserForm({
           onChange={(e) => setEmail(e.target.value)}
           className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
           placeholder="e.g. jane@example.com"
-        />
-      </Field>
-
-      <Field label={initial ? "New password (optional)" : "Password"}>
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          type="password"
-          className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
-          placeholder={initial ? "Leave blank to keep current password" : "Min 6 characters"}
         />
       </Field>
 
@@ -282,4 +236,3 @@ function IconSearch({ className }: { className?: string }) {
     </svg>
   );
 }
-

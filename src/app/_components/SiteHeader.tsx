@@ -137,6 +137,20 @@ export default function SiteHeader({ accent }: { accent: string }) {
                 <div className="h-px bg-zinc-100" />
                 <div className="p-2">
                   <Link
+                    href="/account"
+                    onClick={() => setMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/account/purchases"
+                    onClick={() => setMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
+                  >
+                    Purchases
+                  </Link>
+                  <Link
                     href="/account/wishlist"
                     onClick={() => setMenuOpen(false)}
                     className="block rounded-xl px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
@@ -232,7 +246,14 @@ export default function SiteHeader({ accent }: { accent: string }) {
                     onClick={() => setMobileOpen(false)}
                     className="mt-1 block rounded-2xl px-4 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
                   >
-                    Account
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/account/purchases"
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-1 block rounded-2xl px-4 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
+                  >
+                    Purchases
                   </Link>
                   <Link
                     href="/account/wishlist"

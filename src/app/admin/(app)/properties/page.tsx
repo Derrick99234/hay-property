@@ -187,7 +187,7 @@ function PropertyForm({
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [price, setPrice] = useState(initial?.price ? String(initial.price) : "");
+  const [price, setPrice] = useState(typeof initial?.price === "number" ? String(initial.price) : "");
   const [status, setStatus] = useState<AdminProperty["status"]>(initial?.status ?? "DRAFT");
 
   useEffect(() => {
@@ -200,17 +200,18 @@ function PropertyForm({
       setSlug(toSlug(nextTitle));
       return;
     }
-    setSlug(initialSlug);
+    setSlug(initialSlug.trim().length > 2 ? initialSlug : toSlug(nextTitle || initialTitle));
   }, [initial, initialSlug, initialTitle, title]);
 
   const parsedPrice = Number(price.replaceAll(",", ""));
-  const imageCount = imageFiles.length || (initial?.imageUrls?.length ?? 0);
+  const existingImages = initial?.imageUrls?.length ?? 0;
+  const imageCount = initial ? existingImages + imageFiles.length : imageFiles.length;
   const canSubmit =
     title.trim().length > 2 &&
     slug.trim().length > 2 &&
     location.trim().length > 2 &&
     Number.isFinite(parsedPrice) &&
-    parsedPrice > 0 &&
+    parsedPrice >= 0 &&
     imageCount <= 5 &&
     (status !== "AVAILABLE" || imageCount >= 3);
 
@@ -257,7 +258,7 @@ function PropertyForm({
         />
       </Field>
 
-      <Field label={initial ? "Images (replace with 3–5 files)" : "Images (3–5 files)"}>
+      <Field label={initial ? "Images (add files, up to 5 total)" : "Images (0–5 files)"}>
         <div className="space-y-2">
           {initial?.imageUrls?.length ? (
             <div className="text-xs text-zinc-500">Current images: {initial.imageUrls.length}</div>
@@ -268,12 +269,13 @@ function PropertyForm({
             multiple
             onChange={(e) => {
               const files = Array.from(e.target.files ?? []);
-              setImageFiles(files.slice(0, 5));
+              const remaining = initial ? Math.max(0, 5 - (initial.imageUrls?.length ?? 0)) : 5;
+              setImageFiles(files.slice(0, remaining));
             }}
             className="block w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-zinc-300"
           />
           <div className="text-xs text-zinc-500">
-            Selected: {imageFiles.length || (initial?.imageUrls?.length ?? 0)}/5
+            Total: {Math.min(5, imageCount)}/5
           </div>
         </div>
       </Field>

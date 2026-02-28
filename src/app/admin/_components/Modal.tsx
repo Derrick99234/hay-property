@@ -25,15 +25,15 @@ export default function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={title}>
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-black/45"
+        className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
         onClick={onClose}
       />
-      <div className="absolute inset-x-0 top-10 mx-auto w-full max-w-lg px-5 sm:px-10">
-        <div className="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-zinc-100">
+      <div className="absolute inset-0 flex items-start justify-center px-4 py-6 sm:px-10 sm:py-10">
+        <div className="w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-zinc-100">
           <div className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4">
             <div className="text-sm font-semibold text-zinc-900">{title}</div>
             <button
@@ -45,7 +45,7 @@ export default function Modal({
               <IconClose />
             </button>
           </div>
-          <div className="px-5 py-5">{children}</div>
+          <div className="max-h-[calc(100vh-160px)] overflow-y-auto px-5 py-5">{children}</div>
         </div>
       </div>
     </div>

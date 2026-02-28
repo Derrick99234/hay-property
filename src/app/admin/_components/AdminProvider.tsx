@@ -250,7 +250,11 @@ export default function AdminProvider({
       }
       if (Array.isArray(input.imageFiles) && input.imageFiles.length) {
         const imageFiles = input.imageFiles.slice(0, 5);
-        payload.images = await uploadPropertyImages(id, imageFiles);
+        const uploaded = await uploadPropertyImages(id, imageFiles);
+        const existing = db.properties.find((p) => p.id === id);
+        const existingUrls = Array.isArray(existing?.imageUrls) ? existing!.imageUrls : [];
+        const combinedUrls = [...existingUrls, ...uploaded.map((u) => u.url)].filter(Boolean).slice(0, 5);
+        payload.images = combinedUrls.map((url, idx) => ({ url, order: idx }));
       }
 
       const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {

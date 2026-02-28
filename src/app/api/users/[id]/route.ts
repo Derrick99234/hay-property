@@ -50,6 +50,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       update.status = body.status;
     }
     if (typeof body.password === "string") {
+      if (await isAdmin(req)) return jsonError("Admins cannot update user passwords.", { status: 403 });
       if (body.password.length < 6) return jsonError("Password must be at least 6 characters.", { status: 400 });
       update.passwordHash = await hashPassword(body.password);
     }
@@ -71,9 +72,5 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
   const id = getIdFromParams(params);
   if (!id) return jsonError("Missing id.", { status: 400 });
   if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
-
-  await connectMongo();
-  const deleted = await User.findByIdAndDelete(id).lean();
-  if (!deleted) return jsonError("Not found.", { status: 404 });
-  return jsonOk({ id });
+  return jsonError("Deleting users from admin is disabled.", { status: 403 });
 }
