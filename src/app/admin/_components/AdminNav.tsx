@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/properties", label: "Properties" },
   { href: "/admin/purchases", label: "Purchases" },
   { href: "/admin/blogs", label: "Blogs" },
+  { href: "/admin/ai-knowledge", label: "AI / Knowledge" },
 ];
 
 export default function AdminNav() {

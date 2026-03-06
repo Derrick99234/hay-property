@@ -137,3 +137,25 @@ Use Retrieval-Augmented Generation (RAG) to force the bot to answer from company
 4. Guardrails + WhatsApp escalation
 5. Analytics + feedback
 
+### 13) Project Setup (Current Implementation)
+This project now contains:
+- Chat UI: a floating website widget.
+- Chat API: `POST /api/ai/chat` (Gemini + MongoDB knowledge retrieval).
+- Ingestion API (admin-only): `POST /api/ai/ingest` to build the knowledge base from the website + MongoDB (properties/blogs).
+
+**Environment variables**
+- `GEMINI_API_KEY` (server-side)
+- `NEXT_PUBLIC_WHATSAPP_URL` (client-side; used to open WhatsApp)
+- `MONGODB_URI` (already required by the project)
+
+### 14) How To Run It
+1. Start the app normally (dev or production).
+2. Sign in as admin.
+3. Trigger ingestion:
+   - Call `POST /api/ai/ingest` while authenticated as admin.
+4. Open the website and use the chat widget (bottom-right).
+
+### 15) How The Bot Stays In Scope
+- The chat endpoint retrieves the most relevant knowledge chunks from MongoDB.
+- If retrieval confidence is low, the endpoint escalates to WhatsApp.
+- The Gemini prompt is constrained to answer only from retrieved sources; otherwise it escalates.

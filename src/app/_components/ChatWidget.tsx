@@ -6,10 +6,10 @@ type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   text: string;
-  kind?: "normal" | "escalate";
 };
 
 const ACCENT = "#f2555d";
+const SESSION_KEY = "hp_chat_sid_tmp";
 
 function createId() {
   const g = globalThis as unknown as { crypto?: Crypto };
@@ -17,73 +17,64 @@ function createId() {
   return raw.replaceAll("-", "").slice(0, 12);
 }
 
-function isInScope(text: string) {
-  const t = text.toLowerCase();
-  const keywords = [
-    "hay",
-    "property",
-    "properties",
-    "land",
-    "plot",
-    "estate",
-    "inspection",
-    "book",
-    "contact",
-    "address",
-    "email",
-    "phone",
-    "whatsapp",
-    "lagos",
-    "ibeju",
-    "lekki",
-    "buy",
-    "purchase",
-    "payment",
-    "price",
-    "available",
-    "sold",
-    "blog",
-    "terms",
-    "privacy",
-  ];
-  return keywords.some((k) => t.includes(k));
+function createSessionId() {
+  const g = globalThis as unknown as { crypto?: Crypto };
+  return g.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
 }
 
-function getWhatsappUrl(message?: string) {
-  const base = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? "";
-  if (!base) return "/contact";
-  const trimmed = base.trim();
-  if (!message) return trimmed;
-  const joiner = trimmed.includes("?") ? "&" : "?";
-  return `${trimmed}${joiner}text=${encodeURIComponent(message)}`;
+function getStoredSessionId() {
+  try {
+    return sessionStorage.getItem(SESSION_KEY) ?? "";
+  } catch {
+    return "";
+  }
 }
 
-function buildStubAnswer(question: string) {
-  const lower = question.toLowerCase();
-  if (lower.includes("contact") || lower.includes("phone") || lower.includes("email") || lower.includes("whatsapp")) {
-    return "You can reach HAY Property via our Contact page. If you prefer WhatsApp, tap “Chat on WhatsApp” below.";
-  }
-  if (lower.includes("inspection") || lower.includes("book")) {
-    return "To book an inspection, use the “Book Inspection” button on the site or message our team on WhatsApp for available time slots.";
-  }
-  if (lower.includes("price") || lower.includes("payment")) {
-    return "Pricing and payment options depend on the property. Share the property name/slug and our team can confirm details on WhatsApp.";
-  }
-  if (lower.includes("location") || lower.includes("where") || lower.includes("lagos")) {
-    return "We list verified properties and land listings. Browse available listings on the Properties page to see locations and details.";
-  }
-  return "I can help with questions about HAY Property (properties, inspections, blog, policies, contact). Ask a specific question or tap a quick option below.";
+function setStoredSessionId(id: string) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, id);
+  } catch {}
+}
+
+function clearStoredSessionId() {
+  try {
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch {}
+}
+
+async function chatApi(message: string, sessionId: string) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  const res = await fetch("/api/ai/chat", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-hp-chat-sid": sessionId },
+    body: JSON.stringify({ message }),
+    signal: ctrl.signal,
+  });
+  clearTimeout(timer);
+  const payload = (await res.json()) as {
+    ok: boolean;
+    data?: { reply?: string; sources?: Array<{ index: number; title: string; url: string }> };
+    error?: string;
+  };
+  if (!res.ok || !payload.ok) throw new Error(payload.error || "Chat failed.");
+  const data = payload.data ?? {};
+  return {
+    reply: String(data.reply ?? ""),
+    sources: Array.isArray(data.sources) ? data.sources : [],
+  };
 }
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: createId(),
       role: "assistant",
-      text: "Hi! I’m the HAY Property assistant. Ask me anything about HAY Property. If your question needs our team, I’ll send you to WhatsApp.",
-      kind: "normal",
+      text: "Hi! I’m the HAY Property assistant. Ask me anything about HAY Property.",
     },
   ]);
 
@@ -98,48 +89,74 @@ export default function ChatWidget() {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") void closeChat();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  const lastUserQuestion = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === "user") return messages[i].text;
+  useEffect(() => {
+    if (!open) return;
+    const existing = getStoredSessionId();
+    const sid = existing || createSessionId();
+    if (!existing) setStoredSessionId(sid);
+    setSessionId(sid);
+  }, [open]);
+
+  const resetLocalChat = () => {
+    setMessages([
+      {
+        id: createId(),
+        role: "assistant",
+        text: "Hi! I’m the HAY Property assistant. Ask me anything about HAY Property.",
+      },
+    ]);
+    setInput("");
+    setSending(false);
+  };
+
+  const closeChat = async () => {
+    const sid = sessionId || getStoredSessionId();
+    if (sid) {
+      try {
+        await fetch("/api/ai/chat/reset", { method: "POST", headers: { "x-hp-chat-sid": sid } });
+      } catch {}
     }
-    return "";
-  }, [messages]);
+    clearStoredSessionId();
+    setSessionId("");
+    resetLocalChat();
+    setOpen(false);
+  };
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     const q = text.trim();
-    if (!q) return;
+    if (!q || sending) return;
 
-    setMessages((prev) => [...prev, { id: createId(), role: "user", text: q, kind: "normal" }]);
-
-    const inScope = isInScope(q);
-    if (!inScope) {
+    setMessages((prev) => [...prev, { id: createId(), role: "user", text: q }]);
+    setSending(true);
+    try {
+      const sid = sessionId || getStoredSessionId() || createSessionId();
+      if (!sessionId) setSessionId(sid);
+      setStoredSessionId(sid);
+      const result = await chatApi(q, sid);
+      setMessages((prev) => [...prev, { id: createId(), role: "assistant", text: result.reply }]);
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
         {
           id: createId(),
           role: "assistant",
-          kind: "escalate",
-          text: "I can only answer questions about HAY Property. Please chat with our team on WhatsApp for help.",
+          text:
+            err instanceof Error
+              ? err.name === "AbortError"
+                ? "This is taking too long right now. Please try again."
+                : `Sorry—chat is not ready yet (${err.message}).`
+              : "This is taking too long right now. Please try again.",
         },
       ]);
-      return;
+    } finally {
+      setSending(false);
     }
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: createId(),
-        role: "assistant",
-        kind: "normal",
-        text: buildStubAnswer(q),
-      },
-    ]);
   };
 
   const quickActions = [
@@ -156,11 +173,11 @@ export default function ChatWidget() {
           <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-4 py-4">
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-zinc-900">HAY Property Assistant</div>
-              <div className="truncate text-xs text-zinc-500">Company-only help • WhatsApp fallback</div>
+              <div className="truncate text-xs text-zinc-500">Company-only customer support</div>
             </div>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => void closeChat()}
               className="grid size-10 place-items-center rounded-full border border-zinc-200 bg-white text-zinc-900 shadow-sm transition hover:border-zinc-300"
               aria-label="Close chat"
             >
@@ -176,25 +193,10 @@ export default function ChatWidget() {
                     "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ring-1",
                     m.role === "user"
                       ? "bg-zinc-900 text-white ring-zinc-900"
-                      : m.kind === "escalate"
-                        ? "bg-red-50 text-red-900 ring-red-100"
-                        : "bg-white text-zinc-900 ring-zinc-100",
+                      : "bg-white text-zinc-900 ring-zinc-100",
                   ].join(" ")}
                 >
                   {m.text}
-                  {m.role === "assistant" && m.kind === "escalate" ? (
-                    <div className="mt-3">
-                      <a
-                        href={getWhatsappUrl(`Hello HAY Property, I need help with: ${lastUserQuestion || ""}`)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex h-10 items-center justify-center rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95"
-                        style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
-                      >
-                        Chat on WhatsApp
-                      </a>
-                    </div>
-                  ) : null}
                 </div>
               </div>
             ))}
@@ -220,7 +222,7 @@ export default function ChatWidget() {
               e.preventDefault();
               const next = input;
               setInput("");
-              send(next);
+              void send(next);
             }}
             className="border-t border-zinc-100 p-3"
           >
@@ -233,23 +235,15 @@ export default function ChatWidget() {
               />
               <button
                 type="submit"
-                disabled={input.trim().length === 0}
+                disabled={input.trim().length === 0 || sending}
                 className="inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
                 style={{ backgroundColor: ACCENT }}
               >
-                Send
+                {sending ? "Sending..." : "Send"}
               </button>
             </div>
             <div className="mt-2 flex items-center justify-between gap-2">
-              <a
-                href={getWhatsappUrl("Hello HAY Property, I need assistance.")}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-semibold text-zinc-600 hover:text-zinc-900"
-              >
-                Open WhatsApp
-              </a>
-              <div className="text-xs text-zinc-500">This is a UI preview (AI not connected yet).</div>
+              <div className="text-xs text-zinc-500">Customer support assistant</div>
             </div>
           </form>
         </div>
@@ -291,4 +285,3 @@ function IconChat() {
     </svg>
   );
 }
-

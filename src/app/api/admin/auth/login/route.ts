@@ -14,8 +14,6 @@ export async function POST(req: NextRequest) {
   const email = body.email?.trim().toLowerCase();
   const password = body.password ?? "";
 
-  console.log(`email: ${email}, password: ${password}`)
-
   if (!email || !email.includes("@")) return jsonError("Invalid email.", { status: 400 });
   if (!password) return jsonError("Invalid password.", { status: 400 });
 
