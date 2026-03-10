@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Script from "next/script";
 import HeroCarousel from "./_components/HeroCarousel";
 import { connectMongo } from "../lib/mongodb";
 import {
@@ -105,10 +106,18 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-[#eef1f5] text-zinc-900">
-      <script type="application/ld+json">{JSON.stringify(orgJsonLd)}</script>
-      <script type="application/ld+json">
-        {JSON.stringify(websiteJsonLd)}
-      </script>
+      <Script
+        id="jsonld-org"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+      <Script
+        id="jsonld-website"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-10 lg:px-16">
         <SiteHeader accent={ACCENT} />
 
