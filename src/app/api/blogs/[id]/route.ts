@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../../lib/mongodb";
+import { rewriteToPublicBaseUrl } from "../../../../lib/r2";
 import { Blog } from "../../../../models/Blog";
 import { isAdmin } from "../../_lib/auth";
 import { isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../../_lib/http";
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (!doc) return jsonError("Not found.", { status: 404 });
   if (!admin && !(doc as { published?: boolean }).published) return jsonError("Not found.", { status: 404 });
 
-  return jsonOk(doc);
+  return jsonOk({ ...(doc as any), coverUrl: rewriteToPublicBaseUrl(String((doc as any).coverUrl ?? "").trim()) });
 }
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -103,7 +104,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       .lean();
     if (!doc) return jsonError("Not found.", { status: 404 });
 
-    return jsonOk(doc);
+    return jsonOk({ ...(doc as any), coverUrl: rewriteToPublicBaseUrl(String((doc as any).coverUrl ?? "").trim()) });
   } catch (err) {
     if (isMongoDuplicateKeyError(err)) return jsonError("Slug already exists.", { status: 409 });
     if (err instanceof mongoose.Error.ValidationError) return jsonError(err.message, { status: 400 });

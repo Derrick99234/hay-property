@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { connectMongo } from "../../../lib/mongodb";
 import { Property } from "../../../models/Property";
 import { User } from "../../../models/User";
-import { pickPropertyImage } from "../../../lib/unsplash";
 import WishlistButton from "../../_components/WishlistButton";
 import SiteHeader from "../../_components/SiteHeader";
 import SiteFooter from "../../_components/SiteFooter";
@@ -16,10 +15,6 @@ const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
 
 export const revalidate = 30;
-
-function fallbackCoverUrl(slug: string) {
-  return pickPropertyImage(slug);
-}
 
 function formatMoneyNGN(value: number) {
   const safe = Number.isFinite(value) ? value : 0;
@@ -90,18 +85,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
   const images = Array.isArray((doc as any).images) ? (doc as any).images : [];
   const rawGallery: string[] = images.map((i: any) => String(i?.url ?? "").trim()).filter(Boolean);
-  const filledGallery = [...rawGallery];
-  for (let i = filledGallery.length; i < 5; i++) filledGallery.push(pickPropertyImage(`${slug}-${i + 1}`));
-  const gallery = filledGallery.slice(0, 5);
-  const coverUrl = gallery[0] || fallbackCoverUrl(slug);
+  const gallery = rawGallery.slice(0, 5);
+  const coverUrl = gallery[0] ?? "";
+  const sideGallery = Array.from({ length: 4 }, (_, idx) => gallery[idx + 1] ?? "");
 
-  const meta = (doc as any).metadata ?? undefined;
-  const rawFeatures = Array.isArray(meta?.features)
-    ? meta.features
-    : typeof meta?.features === "string"
-      ? meta.features.split(/\n|,/)
-      : [];
-  const features = rawFeatures.map((x: any) => String(x).trim()).filter(Boolean).slice(0, 8);
+  const rawFeatures = Array.isArray((doc as any).features) ? (doc as any).features : [];
+  const features = rawFeatures.map((x: any) => String(x).trim()).filter(Boolean).slice(0, 20);
 
   let similar: any[] = [];
   try {
@@ -140,20 +129,34 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
           <section className="space-y-6">
             <div className="grid gap-4 lg:grid-cols-[1.45fr_1fr] lg:grid-rows-2">
               <div className="relative min-h-[280px] overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-zinc-100 sm:min-h-[380px] lg:row-span-2 lg:min-h-[520px]">
-                <img src={coverUrl} alt={title} className="absolute inset-0 h-full w-full object-cover" loading="eager" referrerPolicy="no-referrer" />
+                {coverUrl ? (
+                  <img src={coverUrl} alt={title} className="absolute inset-0 h-full w-full object-cover" loading="eager" referrerPolicy="no-referrer" />
+                ) : (
+                  <div
+                    className="absolute inset-0 bg-[radial-gradient(700px_420px_at_25%_20%,rgba(34,197,94,0.20),transparent),radial-gradient(700px_420px_at_90%_85%,rgba(59,130,246,0.16),transparent),linear-gradient(120deg,rgba(255,255,255,0.55),rgba(244,244,245,0.70))]"
+                    aria-hidden="true"
+                  />
+                )}
                 <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent" />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:row-span-2 lg:grid-cols-2 lg:grid-rows-2">
-                {gallery.slice(1, 5).map((src, idx) => (
+                {sideGallery.map((src, idx) => (
                   <div key={idx} className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-zinc-100 lg:aspect-auto lg:h-full">
-                    <img
-                      src={src}
-                      alt={`${title} image ${idx + 2}`}
-                      className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out hover:scale-[1.02]"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                    />
+                    {src ? (
+                      <img
+                        src={src}
+                        alt={`${title} image ${idx + 2}`}
+                        className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out hover:scale-[1.02]"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div
+                        className="absolute inset-0 bg-[radial-gradient(700px_420px_at_25%_20%,rgba(34,197,94,0.20),transparent),radial-gradient(700px_420px_at_90%_85%,rgba(59,130,246,0.16),transparent),linear-gradient(120deg,rgba(255,255,255,0.55),rgba(244,244,245,0.70))]"
+                        aria-hidden="true"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-transparent" />
                   </div>
                 ))}
@@ -189,24 +192,18 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
               <div className="space-y-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Key features</div>
-                <ul className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
-                  {(features.length
-                    ? features
-                    : ([
-                        "Verified documentation",
-                        "Accessible location",
-                        "Secure investment option",
-                        "Flexible payment plan",
-                        "Instant allocation (subject to terms)",
-                        "High growth potential",
-                      ] as string[])
-                  ).map((f: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="mt-2 size-1.5 rounded-full bg-zinc-400" aria-hidden="true" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
+                {features.length ? (
+                  <ul className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
+                    {features.map((f: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="mt-2 size-1.5 rounded-full bg-zinc-400" aria-hidden="true" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-sm text-zinc-600">No key features listed yet.</div>
+                )}
               </div>
             </div>
 
@@ -230,7 +227,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                 const pstate = String((p as any).state ?? "");
                 const ploc = [pcity, pstate].filter(Boolean).join(", ");
                 const pprice = Number((p as any).price ?? 0);
-                const pcover = String((p as any).images?.[0]?.url ?? "").trim() || pickPropertyImage(pslug);
+                const pcover = String((p as any).images?.[0]?.url ?? "").trim();
                 return (
                   <Link
                     key={pid}
@@ -238,13 +235,20 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
                     className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-zinc-100 transition hover:-translate-y-0.5 hover:shadow-md"
                   >
                     <div className="relative aspect-[16/11] bg-zinc-200">
-                      <img
-                        src={pcover}
-                        alt={ptitle}
-                        className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.03]"
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                      />
+                      {pcover ? (
+                        <img
+                          src={pcover}
+                          alt={ptitle}
+                          className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.03]"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div
+                          className="absolute inset-0 bg-[radial-gradient(700px_420px_at_25%_20%,rgba(34,197,94,0.20),transparent),radial-gradient(700px_420px_at_90%_85%,rgba(59,130,246,0.16),transparent),linear-gradient(120deg,rgba(255,255,255,0.55),rgba(244,244,245,0.70))]"
+                          aria-hidden="true"
+                        />
+                      )}
                       <div className="absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-transparent" />
                     </div>
                     <div className="space-y-2 p-5">

@@ -6,7 +6,6 @@ import { connectMongo } from "../lib/mongodb";
 import {
   pickBlogImage,
   pickLandImage,
-  pickPropertyImage,
 } from "../lib/unsplash";
 import { Blog } from "../models/Blog";
 import { Property } from "../models/Property";
@@ -222,9 +221,7 @@ export default async function Home() {
                       const city = String((p as any).city ?? "");
                       const state = String((p as any).state ?? "");
                       const location = [city, state].filter(Boolean).join(", ");
-                      const coverUrl =
-                        String((p as any).images?.[0]?.url ?? "").trim() ||
-                        pickPropertyImage(slug);
+                      const coverUrl = String((p as any).images?.[0]?.url ?? "").trim() || undefined;
                       const price = formatMoney(
                         Number((p as any).price ?? 0),
                         String((p as any).currency ?? "NGN"),
@@ -250,7 +247,7 @@ export default async function Home() {
                         location="Ibeju-Lekki, Lagos"
                         price={formatMoney(12750000, "NGN")}
                         showBrand
-                        imageUrl={pickPropertyImage("home-pride-rock")}
+                        imageUrl={undefined}
                         accent={ACCENT}
                         href="/properties"
                       />,
@@ -259,7 +256,7 @@ export default async function Home() {
                         title="Emerald Gardens Residence"
                         location="Lekki, Lagos"
                         price={formatMoney(38500000, "NGN")}
-                        imageUrl={pickPropertyImage("home-emerald")}
+                        imageUrl={undefined}
                         accent={ACCENT}
                         href="/properties"
                       />,
@@ -268,7 +265,7 @@ export default async function Home() {
                         title="Cedarview Apartments"
                         location="Wuse 2, Abuja"
                         price={formatMoney(22000000, "NGN")}
-                        imageUrl={pickPropertyImage("home-cedarview")}
+                        imageUrl={undefined}
                         accent={ACCENT}
                         href="/properties"
                       />,
@@ -346,9 +343,7 @@ export default async function Home() {
                     const city = String((p as any).city ?? "");
                     const state = String((p as any).state ?? "");
                     const location = [city, state].filter(Boolean).join(", ");
-                    const coverUrl =
-                      String((p as any).images?.[0]?.url ?? "").trim() ||
-                      pickPropertyImage(slug || `home-wide-${idx}`);
+                    const coverUrl = String((p as any).images?.[0]?.url ?? "").trim() || undefined;
                     const price = formatMoney(
                       Number((p as any).price ?? 0),
                       String((p as any).currency ?? "NGN"),

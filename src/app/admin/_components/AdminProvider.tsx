@@ -12,8 +12,37 @@ type AdminContextValue = {
   updateUser: (id: string, input: Partial<{ name: string; email: string; password: string; status: AdminUser["status"] }>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
-  createProperty: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageFiles: File[] }) => Promise<void>;
-  updateProperty: (id: string, input: Partial<{ title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageFiles: File[] }>) => Promise<void>;
+  createProperty: (input: {
+    title: string;
+    slug: string;
+    description: string;
+    features: string[];
+    price: number;
+    currency: string;
+    status: AdminProperty["status"];
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    imageFiles: File[];
+  }) => Promise<void>;
+  updateProperty: (
+    id: string,
+    input: Partial<{
+      title: string;
+      slug: string;
+      description: string;
+      features: string[];
+      price: number;
+      currency: string;
+      status: AdminProperty["status"];
+      address: string;
+      city: string;
+      state: string;
+      country: string;
+      imageFiles: File[];
+    }>
+  ) => Promise<void>;
   deleteProperty: (id: string) => Promise<void>;
 
   createBlog: (input: {
@@ -78,7 +107,14 @@ export default function AdminProvider({
           slug: String(p.slug ?? ""),
           location: [p.city, p.state].filter(Boolean).join(", ") || String(p.address ?? ""),
           price: Number(p.price ?? 0),
+          currency: String(p.currency ?? "NGN"),
           status: (p.status ?? "DRAFT") as AdminProperty["status"],
+          description: String(p.description ?? ""),
+          features: Array.isArray(p.features) ? p.features.map((x: any) => String(x ?? "").trim()).filter(Boolean) : [],
+          address: String(p.address ?? ""),
+          city: String(p.city ?? ""),
+          state: String(p.state ?? ""),
+          country: String(p.country ?? "Nigeria"),
           imageUrls: Array.isArray(p.images) ? p.images.map((i: any) => String(i?.url ?? "").trim()).filter(Boolean) : [],
           createdAt: String(p.createdAt ?? new Date().toISOString()),
         })),
@@ -140,10 +176,11 @@ export default function AdminProvider({
   }, []);
 
   const value = useMemo<AdminContextValue>(() => {
-    const uploadPropertyImages = async (propertyId: string, files: File[]) => {
+    const uploadPropertyImages = async (args: { propertyId?: string; propertySlug?: string; files: File[] }) => {
       const fd = new FormData();
-      fd.set("propertyId", propertyId);
-      for (const f of files) fd.append("images", f);
+      if (args.propertySlug) fd.set("propertySlug", args.propertySlug);
+      if (args.propertyId) fd.set("propertyId", args.propertyId);
+      for (const f of args.files) fd.append("images", f);
 
       const res = await fetch("/api/uploads/property-images", { method: "POST", body: fd });
       const data = (await res.json()) as { ok: boolean; data?: { images?: Array<{ url: string; order: number }> }; error?: string };
@@ -197,7 +234,6 @@ export default function AdminProvider({
     };
 
     const createProperty: AdminContextValue["createProperty"] = async (input) => {
-      const [city, state] = input.location.split(",").map((s) => s.trim());
       const imageFiles = Array.isArray(input.imageFiles) ? input.imageFiles.slice(0, 5) : [];
       const finalStatus = input.status;
       const res = await fetch("/api/properties", {
@@ -206,10 +242,15 @@ export default function AdminProvider({
         body: JSON.stringify({
           title: input.title,
           slug: input.slug,
+          description: input.description,
+          features: input.features,
           price: input.price,
+          currency: input.currency,
           status: "DRAFT",
-          city: city || undefined,
-          state: state || undefined,
+          address: input.address || undefined,
+          city: input.city || undefined,
+          state: input.state || undefined,
+          country: input.country || undefined,
           images: [],
         }),
       });
@@ -218,10 +259,11 @@ export default function AdminProvider({
 
       const createdId = String(data.data?._id ?? data.data?.id ?? "");
       if (!createdId) throw new Error("Failed to create property.");
+      const createdSlug = String(data.data?.slug ?? input.slug ?? "").trim();
 
       const payload: Record<string, unknown> = {};
       if (imageFiles.length) {
-        const images = await uploadPropertyImages(createdId, imageFiles);
+        const images = await uploadPropertyImages({ propertyId: createdId, propertySlug: createdSlug, files: imageFiles });
         payload.images = images;
       }
       payload.status = finalStatus;
@@ -241,17 +283,20 @@ export default function AdminProvider({
       const payload: Record<string, unknown> = {};
       if (typeof input.title === "string") payload.title = input.title;
       if (typeof input.slug === "string") payload.slug = input.slug;
+      if (typeof input.description === "string") payload.description = input.description;
+      if (Array.isArray(input.features)) payload.features = input.features;
       if (typeof input.price === "number") payload.price = input.price;
+      if (typeof input.currency === "string") payload.currency = input.currency;
       if (typeof input.status === "string") payload.status = input.status;
-      if (typeof input.location === "string") {
-        const [city, state] = input.location.split(",").map((s) => s.trim());
-        payload.city = city || undefined;
-        payload.state = state || undefined;
-      }
+      if (typeof input.address === "string") payload.address = input.address || undefined;
+      if (typeof input.city === "string") payload.city = input.city || undefined;
+      if (typeof input.state === "string") payload.state = input.state || undefined;
+      if (typeof input.country === "string") payload.country = input.country || undefined;
       if (Array.isArray(input.imageFiles) && input.imageFiles.length) {
         const imageFiles = input.imageFiles.slice(0, 5);
-        const uploaded = await uploadPropertyImages(id, imageFiles);
         const existing = db.properties.find((p) => p.id === id);
+        const propertySlug = typeof input.slug === "string" ? input.slug : String(existing?.slug ?? "");
+        const uploaded = await uploadPropertyImages({ propertyId: id, propertySlug, files: imageFiles });
         const existingUrls = Array.isArray(existing?.imageUrls) ? existing!.imageUrls : [];
         const combinedUrls = [...existingUrls, ...uploaded.map((u) => u.url)].filter(Boolean).slice(0, 5);
         payload.images = combinedUrls.map((url, idx) => ({ url, order: idx }));

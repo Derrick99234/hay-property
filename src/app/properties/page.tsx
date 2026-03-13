@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { connectMongo } from "../../lib/mongodb";
 import { Property } from "../../models/Property";
 import { User } from "../../models/User";
-import { pickHeroImage, pickPropertyImage } from "../../lib/unsplash";
+import { pickHeroImage } from "../../lib/unsplash";
 import SiteFooter from "../_components/SiteFooter";
 import WishlistButton from "../_components/WishlistButton";
 import { parseSessionCookie } from "../auth/_lib/session";
@@ -14,10 +14,6 @@ const ACCENT = "#f2555d";
 const NAVY = "#1d2b56";
 
 export const revalidate = 30;
-
-function fallbackCoverUrl(slug: string) {
-  return pickPropertyImage(slug);
-}
 
 function formatMoneyNGN(value: number) {
   const safe = Number.isFinite(value) ? value : 0;
@@ -164,7 +160,7 @@ export default async function PropertiesPage({
               const state = String((p as any).state ?? "");
               const location = [city, state].filter(Boolean).join(", ");
               const price = Number((p as any).price ?? 0);
-              const coverUrl = String((p as any).images?.[0]?.url ?? "").trim() || fallbackCoverUrl(slug);
+              const coverUrl = String((p as any).images?.[0]?.url ?? "").trim();
 
               return (
                 <Link
@@ -173,13 +169,20 @@ export default async function PropertiesPage({
                   className="group overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-zinc-100 transition hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="relative aspect-[16/11] bg-zinc-200">
-                    <img
-                      src={coverUrl}
-                      alt={title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                    />
+                    {coverUrl ? (
+                      <img
+                        src={coverUrl}
+                        alt={title}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div
+                        className="absolute inset-0 bg-[radial-gradient(700px_420px_at_25%_20%,rgba(34,197,94,0.20),transparent),radial-gradient(700px_420px_at_90%_85%,rgba(59,130,246,0.16),transparent),linear-gradient(120deg,rgba(255,255,255,0.55),rgba(244,244,245,0.70))]"
+                        aria-hidden="true"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/35 via-transparent to-transparent" />
                     <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-zinc-800 backdrop-blur">
                       AVAILABLE

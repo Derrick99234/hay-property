@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../../lib/mongodb";
+import { rewriteToPublicBaseUrl } from "../../../../lib/r2";
 import { Property } from "../../../../models/Property";
 import { isAdmin } from "../../_lib/auth";
 import { isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../../_lib/http";
@@ -42,7 +43,13 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (!doc) return jsonError("Not found.", { status: 404 });
   if (!admin && (doc as { status?: string }).status !== "AVAILABLE") return jsonError("Not found.", { status: 404 });
 
-  return jsonOk(doc);
+  const normalized = {
+    ...(doc as any),
+    images: Array.isArray((doc as any).images)
+      ? (doc as any).images.map((img: any) => ({ ...img, url: rewriteToPublicBaseUrl(String(img?.url ?? "").trim()) }))
+      : [],
+  };
+  return jsonOk(normalized);
 }
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -58,6 +65,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       title?: string;
       slug?: string;
       description?: string;
+      features?: string[];
       price?: number;
       currency?: string;
       status?: string;
@@ -93,6 +101,9 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       }
     }
     if (typeof body.description === "string") update.description = body.description;
+    if (Array.isArray(body.features)) {
+      update.features = body.features.map((x) => String(x ?? "").trim()).filter(Boolean).slice(0, 20);
+    }
     if (typeof body.price === "number") update.price = body.price;
     if (typeof body.currency === "string") update.currency = body.currency;
     if (typeof body.status === "string") update.status = body.status;
@@ -108,7 +119,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     if (Array.isArray(body.images)) {
       const images = body.images
         .map((img) => ({
-          url: String(img.url ?? "").trim(),
+          url: rewriteToPublicBaseUrl(String(img.url ?? "").trim()),
           alt: typeof img.alt === "string" ? img.alt : undefined,
           order: typeof img.order === "number" ? img.order : 0,
         }))
@@ -139,7 +150,13 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       .lean();
     if (!doc) return jsonError("Not found.", { status: 404 });
 
-    return jsonOk(doc);
+    const normalized = {
+      ...(doc as any),
+      images: Array.isArray((doc as any).images)
+        ? (doc as any).images.map((img: any) => ({ ...img, url: rewriteToPublicBaseUrl(String(img?.url ?? "").trim()) }))
+        : [],
+    };
+    return jsonOk(normalized);
   } catch (err) {
     if (isMongoDuplicateKeyError(err)) return jsonError("Slug already exists.", { status: 409 });
     if (err instanceof mongoose.Error.ValidationError) return jsonError(err.message, { status: 400 });

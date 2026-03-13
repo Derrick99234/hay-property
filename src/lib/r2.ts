@@ -19,11 +19,31 @@ export function getR2Client() {
 }
 
 export function getPublicUrl(key: string) {
-  const base = process.env.R2_PUBLIC_BASE_URL;
-  if (base) return `${base.replace(/\/+$/, "")}/${key.replace(/^\/+/, "")}`;
-  const accountId = requiredEnv("R2_ACCOUNT_ID");
-  const bucket = requiredEnv("R2_BUCKET_NAME");
-  return `https://${bucket}.${accountId}.r2.dev/${key.replace(/^\/+/, "")}`;
+  const base = (process.env.R2_PUBLIC_BASE_URL ?? "").trim();
+  if (!base) throw new Error("Missing R2_PUBLIC_BASE_URL environment variable.");
+  return `${base.replace(/\/+$/, "")}/${key.replace(/^\/+/, "")}`;
+}
+
+export function rewriteToPublicBaseUrl(urlOrKey: string) {
+  const base = (process.env.R2_PUBLIC_BASE_URL ?? "").trim();
+  if (!base) return urlOrKey;
+  const cleanBase = base.replace(/\/+$/, "");
+
+  const raw = String(urlOrKey ?? "").trim();
+  if (!raw) return raw;
+
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    try {
+      const u = new URL(raw);
+      const key = u.pathname.replace(/^\/+/, "");
+      if (!key) return raw;
+      return `${cleanBase}/${key}`;
+    } catch {
+      return raw;
+    }
+  }
+
+  return `${cleanBase}/${raw.replace(/^\/+/, "")}`;
 }
 
 export async function putPublicObject(params: { key: string; body: Uint8Array; contentType: string }) {

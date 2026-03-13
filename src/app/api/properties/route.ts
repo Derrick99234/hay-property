@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../lib/mongodb";
+import { rewriteToPublicBaseUrl } from "../../../lib/r2";
 import { Property } from "../../../models/Property";
 import { getSession, isAdmin } from "../_lib/auth";
 import { getPagination, isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../_lib/http";
@@ -30,9 +31,15 @@ export async function GET(req: NextRequest) {
   const items = await Property.find(filter, null, { sort: { createdAt: -1 }, limit, skip })
     .populate("createdBy", "email name")
     .lean();
+  const normalized = items.map((p: any) => ({
+    ...p,
+    images: Array.isArray(p.images)
+      ? p.images.map((img: any) => ({ ...img, url: rewriteToPublicBaseUrl(String(img?.url ?? "").trim()) }))
+      : [],
+  }));
   const total = await Property.countDocuments(filter);
 
-  return jsonOk({ items, page, limit, total });
+  return jsonOk({ items: normalized, page, limit, total });
 }
 
 export async function POST(req: NextRequest) {
@@ -44,6 +51,7 @@ export async function POST(req: NextRequest) {
       title?: string;
       slug?: string;
       description?: string;
+      features?: string[];
       price?: number;
       currency?: string;
       status?: string;
@@ -70,12 +78,14 @@ export async function POST(req: NextRequest) {
     const images = Array.isArray(body.images)
       ? body.images
           .map((img) => ({
-            url: String(img.url ?? "").trim(),
+            url: rewriteToPublicBaseUrl(String(img.url ?? "").trim()),
             alt: typeof img.alt === "string" ? img.alt : undefined,
             order: typeof img.order === "number" ? img.order : 0,
           }))
           .filter((img) => img.url.length > 0)
       : [];
+
+    const features = Array.isArray(body.features) ? body.features.map((x) => String(x ?? "").trim()).filter(Boolean).slice(0, 20) : [];
 
     if (images.length > 5) return jsonError("Images must be at most 5.", { status: 400 });
     if ((body.status ?? "DRAFT") === "AVAILABLE" && images.length < 3) {
@@ -91,6 +101,7 @@ export async function POST(req: NextRequest) {
       title,
       slug,
       description: body.description,
+      features,
       price: body.price,
       currency: body.currency ?? "NGN",
       status: body.status ?? "DRAFT",

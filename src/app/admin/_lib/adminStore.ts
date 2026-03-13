@@ -12,7 +12,14 @@ export type AdminProperty = {
   slug: string;
   location: string;
   price: number;
+  currency: string;
   status: "DRAFT" | "AVAILABLE" | "SOLD";
+  description: string;
+  features: string[];
+  address: string;
+  city: string;
+  state: string;
+  country: string;
   imageUrls: string[];
   createdAt: string;
 };

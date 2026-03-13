@@ -29,6 +29,7 @@ const PropertySchema = new Schema(
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     description: { type: String },
+    features: { type: [String], default: [] },
 
     price: { type: Number, required: true, min: 0 },
     currency: { type: String, default: "NGN" },
@@ -58,4 +59,3 @@ export type PropertyDoc = InferSchemaType<typeof PropertySchema>;
 export const Property: Model<PropertyDoc> =
   (mongoose.models.Property as Model<PropertyDoc>) ||
   mongoose.model<PropertyDoc>("Property", PropertySchema);
-

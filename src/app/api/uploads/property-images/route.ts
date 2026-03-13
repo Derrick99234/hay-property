@@ -5,7 +5,7 @@ import { connectMongo } from "../../../../lib/mongodb";
 import { putPublicObject, getPublicUrl } from "../../../../lib/r2";
 import { Property } from "../../../../models/Property";
 import { isAdmin } from "../../_lib/auth";
-import { jsonError, jsonOk } from "../../_lib/http";
+import { jsonError, jsonOk, slugify } from "../../_lib/http";
 
 export const runtime = "nodejs";
 
@@ -27,11 +27,20 @@ export async function POST(req: NextRequest) {
   await connectMongo();
 
   const form = await req.formData();
+  const propertySlugRaw = String(form.get("propertySlug") ?? "").trim();
   const propertyId = String(form.get("propertyId") ?? "").trim();
-  if (!mongoose.isValidObjectId(propertyId)) return jsonError("Invalid propertyId.", { status: 400 });
 
-  const exists = await Property.exists({ _id: propertyId });
-  if (!exists) return jsonError("Not found.", { status: 404 });
+  let doc: any = null;
+  if (propertySlugRaw) {
+    const propertySlug = slugify(propertySlugRaw);
+    if (!propertySlug) return jsonError("Invalid propertySlug.", { status: 400 });
+    doc = await Property.findOne({ slug: propertySlug }, { _id: 1, slug: 1 }).lean();
+    if (!doc) return jsonError("Not found.", { status: 404 });
+  } else {
+    if (!mongoose.isValidObjectId(propertyId)) return jsonError("Invalid propertyId.", { status: 400 });
+    doc = await Property.findById(propertyId, { _id: 1, slug: 1 }).lean();
+    if (!doc) return jsonError("Not found.", { status: 404 });
+  }
 
   const files = form.getAll("images").filter(isFile);
   if (!files.length) return jsonError("No images provided.", { status: 400 });
@@ -44,9 +53,11 @@ export async function POST(req: NextRequest) {
     if (!ext) return jsonError("Only JPG, PNG, and WEBP images are allowed.", { status: 400 });
     if (file.size <= 0 || file.size > MAX_BYTES) return jsonError("Each image must be at most 5MB.", { status: 400 });
 
-    const key = `properties/${propertyId}/${crypto.randomUUID()}.${ext}`;
+    const slug = slugify(String((doc as any).slug ?? "")) || String((doc as any)._id ?? "");
+    const key = `properties/${slug}/${crypto.randomUUID()}.${ext}`;
     const buf = new Uint8Array(await file.arrayBuffer());
-    await putPublicObject({ key, body: buf, contentType: file.type });
+    const res = await putPublicObject({ key, body: buf, contentType: file.type });
+    console.log("Uploaded image:", key, res);
     images.push({ url: getPublicUrl(key), order: i });
   }
 

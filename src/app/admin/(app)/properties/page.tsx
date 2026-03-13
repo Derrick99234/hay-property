@@ -4,9 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import Modal from "../../_components/Modal";
 import Pagination from "../../_components/Pagination";
 import { useAdminDB } from "../../_components/AdminProvider";
-import { AdminProperty, formatDateShort, formatMoneyNGN } from "../../_lib/adminStore";
+import { AdminProperty, formatDateShort } from "../../_lib/adminStore";
 
 const ACCENT = "#f2555d";
+
+function formatMoney(value: number, currency: string) {
+  const safe = Number.isFinite(value) ? value : 0;
+  const cur = currency || "NGN";
+  return safe.toLocaleString(undefined, { style: "currency", currency: cur, maximumFractionDigits: 0 });
+}
 
 export default function AdminPropertiesPage() {
   const { db, createProperty, updateProperty, deleteProperty } = useAdminDB();
@@ -57,9 +63,15 @@ export default function AdminPropertiesPage() {
   const onSubmit = async (input: {
     title: string;
     slug: string;
-    location: string;
+    description: string;
+    features: string[];
     price: number;
+    currency: string;
     status: AdminProperty["status"];
+    address: string;
+    city: string;
+    state: string;
+    country: string;
     imageFiles: File[];
   }) => {
     try {
@@ -130,7 +142,7 @@ export default function AdminPropertiesPage() {
                   <tr key={p.id} className="hover:bg-zinc-50/50">
                     <td className="px-5 py-4 font-semibold text-zinc-900">{p.title}</td>
                     <td className="px-5 py-4 text-zinc-600">{p.location}</td>
-                    <td className="px-5 py-4 font-semibold text-zinc-900">{formatMoneyNGN(p.price)}</td>
+                    <td className="px-5 py-4 font-semibold text-zinc-900">{formatMoney(p.price, p.currency)}</td>
                     <td className="px-5 py-4">
                       <StatusPill status={p.status} />
                     </td>
@@ -179,15 +191,34 @@ function PropertyForm({
 }: {
   initial: AdminProperty | null;
   onCancel: () => void;
-  onSubmit: (input: { title: string; slug: string; location: string; price: number; status: AdminProperty["status"]; imageFiles: File[] }) => void;
+  onSubmit: (input: {
+    title: string;
+    slug: string;
+    description: string;
+    features: string[];
+    price: number;
+    currency: string;
+    status: AdminProperty["status"];
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    imageFiles: File[];
+  }) => void;
 }) {
   const initialTitle = initial?.title ?? "";
   const initialSlug = initial?.slug ?? "";
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
-  const [location, setLocation] = useState(initial?.location ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [featuresText, setFeaturesText] = useState(Array.isArray(initial?.features) ? initial!.features.join("\n") : "");
+  const [address, setAddress] = useState(initial?.address ?? "");
+  const [city, setCity] = useState(initial?.city ?? "");
+  const [state, setState] = useState(initial?.state ?? "");
+  const [country, setCountry] = useState(initial?.country ?? "Nigeria");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [price, setPrice] = useState(typeof initial?.price === "number" ? String(initial.price) : "");
+  const [currency, setCurrency] = useState(initial?.currency ?? "NGN");
   const [status, setStatus] = useState<AdminProperty["status"]>(initial?.status ?? "DRAFT");
 
   useEffect(() => {
@@ -209,7 +240,7 @@ function PropertyForm({
   const canSubmit =
     title.trim().length > 2 &&
     slug.trim().length > 2 &&
-    location.trim().length > 2 &&
+    (city.trim().length > 1 || state.trim().length > 1 || address.trim().length > 1) &&
     Number.isFinite(parsedPrice) &&
     parsedPrice >= 0 &&
     imageCount <= 5 &&
@@ -223,10 +254,20 @@ function PropertyForm({
         onSubmit({
           title: title.trim(),
           slug: slug.trim().toLowerCase(),
-          location: location.trim(),
+          description: description.trim(),
+          features: featuresText
+            .split("\n")
+            .map((x) => x.trim())
+            .filter(Boolean)
+            .slice(0, 20),
           imageFiles,
           price: parsedPrice,
+          currency: currency.trim() || "NGN",
           status,
+          address: address.trim(),
+          city: city.trim(),
+          state: state.trim(),
+          country: country.trim() || "Nigeria",
         });
       }}
       className="space-y-4"
@@ -251,12 +292,88 @@ function PropertyForm({
 
       <Field label="Location">
         <input
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          value={[city, state].filter(Boolean).join(", ") || address}
+          readOnly
           className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
-          placeholder="e.g. Ibeju-Lekki, Lagos"
+          placeholder="Set address/city/state below"
         />
       </Field>
+
+      <Field label="Description">
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="min-h-28 w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-zinc-300"
+          placeholder="Short description of the property"
+        />
+      </Field>
+
+      <Field label="Key features (one per line)">
+        <textarea
+          value={featuresText}
+          onChange={(e) => setFeaturesText(e.target.value)}
+          className="min-h-28 w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-zinc-300"
+          placeholder={"Verified documentation\nAccessible location\nFlexible payment plan"}
+        />
+      </Field>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Currency">
+          <input
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+            placeholder="e.g. NGN"
+          />
+        </Field>
+        <Field label="Status">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as AdminProperty["status"])}
+            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+          >
+            <option value="DRAFT">DRAFT</option>
+            <option value="AVAILABLE">AVAILABLE</option>
+            <option value="SOLD">SOLD</option>
+          </select>
+        </Field>
+      </div>
+
+      <Field label="Address">
+        <input
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+          placeholder="Street address (optional)"
+        />
+      </Field>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Field label="City">
+          <input
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+            placeholder="e.g. Ibeju-Lekki"
+          />
+        </Field>
+        <Field label="State">
+          <input
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+            placeholder="e.g. Lagos"
+          />
+        </Field>
+        <Field label="Country">
+          <input
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
+            placeholder="e.g. Nigeria"
+          />
+        </Field>
+      </div>
 
       <Field label={initial ? "Images (add files, up to 5 total)" : "Images (0–5 files)"}>
         <div className="space-y-2">
@@ -281,7 +398,7 @@ function PropertyForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Price (NGN)">
+        <Field label="Price">
           <input
             value={price}
             onChange={(e) => setPrice(e.target.value)}
@@ -290,17 +407,7 @@ function PropertyForm({
             placeholder="e.g. 12750000"
           />
         </Field>
-        <Field label="Status">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as AdminProperty["status"])}
-            className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-300"
-          >
-            <option value="DRAFT">DRAFT</option>
-            <option value="AVAILABLE">AVAILABLE</option>
-            <option value="SOLD">SOLD</option>
-          </select>
-        </Field>
+        <div />
       </div>
 
       <div className="flex items-center justify-end gap-2 pt-2">

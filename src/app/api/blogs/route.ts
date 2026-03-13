@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../lib/mongodb";
+import { rewriteToPublicBaseUrl } from "../../../lib/r2";
 import { Blog } from "../../../models/Blog";
 import { getSession, isAdmin } from "../_lib/auth";
 import { getPagination, isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../_lib/http";
@@ -32,9 +33,10 @@ export async function GET(req: NextRequest) {
   const items = await Blog.find(filter, null, { sort: { createdAt: -1 }, limit, skip })
     .populate("author", "email name")
     .lean();
+  const normalized = items.map((b: any) => ({ ...b, coverUrl: rewriteToPublicBaseUrl(String(b.coverUrl ?? "").trim()) }));
   const total = await Blog.countDocuments(filter);
 
-  return jsonOk({ items, page, limit, total });
+  return jsonOk({ items: normalized, page, limit, total });
 }
 
 export async function POST(req: NextRequest) {
