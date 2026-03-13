@@ -243,8 +243,7 @@ function PropertyForm({
     (city.trim().length > 1 || state.trim().length > 1 || address.trim().length > 1) &&
     Number.isFinite(parsedPrice) &&
     parsedPrice >= 0 &&
-    imageCount <= 5 &&
-    (status !== "AVAILABLE" || imageCount >= 3);
+    imageCount <= 5;
 
   return (
     <form
@@ -414,14 +413,14 @@ function PropertyForm({
         <button
           type="button"
           onClick={onCancel}
-          className="h-10 rounded-full border border-zinc-200 bg-white px-5 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-900 transition hover:border-zinc-300"
+          className="h-10 rounded-full cursor-pointer border border-zinc-200 bg-white px-5 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-900 transition hover:border-zinc-300"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={!canSubmit}
-          className="h-10 rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-10 cursor-pointer rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
           Save
