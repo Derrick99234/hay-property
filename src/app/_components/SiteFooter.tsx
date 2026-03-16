@@ -41,7 +41,7 @@ export default function SiteFooter({ accent, navy }: { accent: string; navy: str
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconMail />
                 </span>
-                <span>hello@hayproperty.com</span>
+                <span>haayyproperties@gmail.com</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">

@@ -83,8 +83,8 @@ export default function PrivacyPolicyPage() {
             <Section title="Contact">
               <p className="text-sm leading-7 text-zinc-700">
                 Questions about privacy? Email{" "}
-                <a className="font-semibold" style={{ color: ACCENT }} href="mailto:hello@hayproperty.com">
-                  hello@hayproperty.com
+                <a className="font-semibold" style={{ color: ACCENT }} href="mailto:haayyproperties@gmail.com">
+                  haayyproperties@gmail.com
                 </a>
                 .
               </p>

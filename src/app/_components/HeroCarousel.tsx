@@ -38,7 +38,7 @@ export default function HeroCarousel({ accent }: { accent: string }) {
         subtitle: "trusted guidance",
         description:
           "From inquiry to allocation, our team stays close—helping you make informed decisions and move fast on opportunities.",
-        mediaLabel: "Ibeju-Lekki",
+        mediaLabel: "Ìrètí Residence Phase II",
         imageUrl: pickHeroImage("hero-3"),
       },
       {

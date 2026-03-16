@@ -1,8 +1,8 @@
 const HERO_IMAGES = [
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80",
+  "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/properties/harvest-grove-agro-estate-2/cb4ffce2-0529-48f9-987c-fc8e653c967c.jpg",
+  "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/properties/harvest-grove-agro-estate-2/dfe04288-bd1e-4444-b952-b1c96e965699.jpg",
+  "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/properties/harvest-grove-agro-estate-2/ee62d090-cff1-4d17-ab99-b789aa8b02ff.jpg",
+  "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/properties/harvest-grove-agro-estate/7451d8d9-a875-494d-91e8-60b5733cb224.jpg",
 ];
 
 const PROPERTY_IMAGES = [
