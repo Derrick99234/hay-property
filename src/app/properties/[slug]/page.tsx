@@ -88,6 +88,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
   const gallery = rawGallery.slice(0, 5);
   const coverUrl = gallery[0] ?? "";
   const sideGallery = Array.from({ length: 4 }, (_, idx) => gallery[idx + 1] ?? "");
+  const carousel = [coverUrl, ...sideGallery];
 
   const rawFeatures = Array.isArray((doc as any).features) ? (doc as any).features : [];
   const features = rawFeatures.map((x: any) => String(x).trim()).filter(Boolean).slice(0, 20);
@@ -127,7 +128,25 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
         <main className="mt-10 space-y-16">
           <section className="space-y-6">
-            <div className="grid gap-4 lg:grid-cols-[1.45fr_1fr] lg:grid-rows-2">
+            <div className="sm:hidden">
+              <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5">
+                {carousel.map((src, idx) => (
+                  <div key={idx} className="relative aspect-[16/11] w-[86%] shrink-0 snap-start overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-zinc-100">
+                    {src ? (
+                      <img src={src} alt={`${title} image ${idx + 1}`} className="absolute inset-0 h-full w-full object-cover" loading={idx === 0 ? "eager" : "lazy"} referrerPolicy="no-referrer" />
+                    ) : (
+                      <div
+                        className="absolute inset-0 bg-[radial-gradient(700px_420px_at_25%_20%,rgba(34,197,94,0.20),transparent),radial-gradient(700px_420px_at_90%_85%,rgba(59,130,246,0.16),transparent),linear-gradient(120deg,rgba(255,255,255,0.55),rgba(244,244,245,0.70))]"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden gap-4 sm:grid lg:grid-cols-[1.45fr_1fr] lg:grid-rows-2">
               <div className="relative min-h-[280px] overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-zinc-100 sm:min-h-[380px] lg:row-span-2 lg:min-h-[520px]">
                 {coverUrl ? (
                   <img src={coverUrl} alt={title} className="absolute inset-0 h-full w-full object-cover" loading="eager" referrerPolicy="no-referrer" />

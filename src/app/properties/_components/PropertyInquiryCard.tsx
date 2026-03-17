@@ -19,6 +19,7 @@ export default function PropertyInquiryCard({
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [mailto, setMailto] = useState<string | null>(null);
+  const [delivered, setDelivered] = useState<boolean | null>(null);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -79,6 +80,7 @@ export default function PropertyInquiryCard({
           setSubmitting(true);
           setSent(false);
           setMailto(null);
+          setDelivered(null);
 
           fetch("/api/inquiries", {
             method: "POST",
@@ -96,10 +98,15 @@ export default function PropertyInquiryCard({
             }),
           })
             .then(async (r) => {
-              const payload = (await r.json()) as { ok: boolean; error?: string; data?: { mailto?: string } };
+              const payload = (await r.json()) as {
+                ok: boolean;
+                error?: string;
+                data?: { mailto?: string; delivered?: boolean };
+              };
               if (!payload.ok) throw new Error(payload.error || "Failed to submit.");
               setSent(true);
               setMailto(payload.data?.mailto ?? null);
+              setDelivered(typeof payload.data?.delivered === "boolean" ? payload.data!.delivered! : null);
               setMessage("");
             })
             .catch((err) => {
@@ -195,8 +202,10 @@ export default function PropertyInquiryCard({
 
         {sent ? (
           <div className="rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-800">
-            Request received. We will contact you shortly.
-            {mailto ? (
+            {delivered
+              ? "Request received. An email has been sent to our team. We will contact you shortly."
+              : "Request received. We will contact you shortly."}
+            {!delivered && mailto ? (
               <div className="mt-2">
                 <a href={mailto} className="font-semibold underline" style={{ color: accent }}>
                   Send via email app
@@ -239,4 +248,3 @@ function Field({ label, children, className }: { label: string; children: React.
     </label>
   );
 }
-

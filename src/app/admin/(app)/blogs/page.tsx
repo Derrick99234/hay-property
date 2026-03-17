@@ -16,6 +16,7 @@ export default function AdminBlogsPage() {
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -66,13 +67,18 @@ export default function AdminBlogsPage() {
     content: string;
     published: boolean;
     coverFile?: File | null;
+    coverUrl?: string;
   }) => {
+    if (saving) return;
+    setSaving(true);
     try {
       if (editing) await updateBlog(editing.id, input);
       else await createBlog(input);
       setOpen(false);
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -96,6 +102,7 @@ export default function AdminBlogsPage() {
         <button
           type="button"
           onClick={startCreate}
+          disabled={saving}
           className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
@@ -187,7 +194,7 @@ export default function AdminBlogsPage() {
       </div>
 
       <Modal open={open} title={editing ? "Edit post" : "Add post"} onClose={() => setOpen(false)}>
-        <BlogForm initial={editing} onCancel={() => setOpen(false)} onSubmit={onSubmit} />
+        <BlogForm initial={editing} saving={saving} onCancel={() => setOpen(false)} onSubmit={onSubmit} />
       </Modal>
     </div>
   );
@@ -195,10 +202,12 @@ export default function AdminBlogsPage() {
 
 function BlogForm({
   initial,
+  saving,
   onCancel,
   onSubmit,
 }: {
   initial: AdminBlog | null;
+  saving: boolean;
   onCancel: () => void;
   onSubmit: (input: {
     title: string;
@@ -208,6 +217,7 @@ function BlogForm({
     content: string;
     published: boolean;
     coverFile?: File | null;
+    coverUrl?: string;
   }) => void;
 }) {
   const initialTitle = initial?.title ?? "";
@@ -217,11 +227,28 @@ function BlogForm({
   const [category, setCategory] = useState(initial?.category ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [keepCoverUrl, setKeepCoverUrl] = useState(String(initial?.coverUrl ?? ""));
+  const [coverPreview, setCoverPreview] = useState<string>("");
   const [content, setContent] = useState(initial?.content ?? "");
   const [published, setPublished] = useState(initial?.published ?? false);
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>([]);
   const [newCategory, setNewCategory] = useState("");
   const [addingCategory, setAddingCategory] = useState(false);
+
+  useEffect(() => {
+    setKeepCoverUrl(String(initial?.coverUrl ?? ""));
+    setCoverFile(null);
+  }, [initial?.id]);
+
+  useEffect(() => {
+    if (!coverFile) {
+      setCoverPreview("");
+      return;
+    }
+    const url = URL.createObjectURL(coverFile);
+    setCoverPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [coverFile]);
 
   useEffect(() => {
     const nextTitle = title.trim();
@@ -264,7 +291,7 @@ function BlogForm({
     return Array.from(names).sort((a, b) => a.localeCompare(b));
   }, [categories, category]);
 
-  const canSubmit = title.trim().length > 4 && slug.trim().length > 2 && category.trim().length > 1;
+  const canSubmit = title.trim().length > 4 && slug.trim().length > 2 && category.trim().length > 1 && !saving;
 
   return (
     <form
@@ -279,6 +306,7 @@ function BlogForm({
           content: content.trim(),
           published,
           coverFile,
+          coverUrl: initial ? keepCoverUrl : undefined,
         });
       }}
       className="space-y-4"
@@ -353,9 +381,44 @@ function BlogForm({
         </Field>
       </div>
 
-      <Field label={initial?.coverUrl ? "Cover image (replace file)" : "Cover image (optional file)"}>
+      <Field label={initial?.coverUrl ? "Cover image" : "Cover image (optional)"}>
         <div className="space-y-2">
-          {initial?.coverUrl ? <div className="text-xs text-zinc-500">Current cover: set</div> : null}
+          {keepCoverUrl ? (
+            <div className="space-y-2">
+              <div className="text-xs text-zinc-500">Current cover</div>
+              <div className="relative overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200">
+                <img src={keepCoverUrl} alt="" className="h-28 w-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                <button
+                  type="button"
+                  onClick={() => setKeepCoverUrl("")}
+                  disabled={saving}
+                  className="absolute right-2 top-2 grid size-9 place-items-center rounded-full bg-white/90 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label="Remove cover"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {coverPreview ? (
+            <div className="space-y-2">
+              <div className="text-xs text-zinc-500">New cover upload</div>
+              <div className="relative overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200">
+                <img src={coverPreview} alt="" className="h-28 w-full object-cover" loading="lazy" />
+                <button
+                  type="button"
+                  onClick={() => setCoverFile(null)}
+                  disabled={saving}
+                  className="absolute right-2 top-2 grid size-9 place-items-center rounded-full bg-white/90 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label="Remove new cover"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -399,6 +462,7 @@ function BlogForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={saving}
           className="h-10 rounded-full border border-zinc-200 bg-white px-5 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-900 transition hover:border-zinc-300"
         >
           Cancel
@@ -409,7 +473,7 @@ function BlogForm({
           className="h-10 rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
-          Save
+          {saving ? "Saving..." : "Save"}
         </button>
       </div>
     </form>

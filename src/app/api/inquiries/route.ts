@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../lib/mongodb";
+import { canSendEmail, sendInquiryEmail } from "../../../lib/email";
 import { Inquiry } from "../../../models/Inquiry";
 import { Property } from "../../../models/Property";
 import { jsonError, jsonOk, readJsonBody } from "../_lib/http";
@@ -70,10 +71,29 @@ export async function POST(req: NextRequest) {
 
     const mailto = `mailto:info@hayproperties.com?subject=${subject}&body=${encodeURIComponent(lines.join("\n"))}`;
 
-    return jsonOk({ id: String((created as any)._id), mailto });
+    const to = (process.env.INQUIRY_TO ?? "").trim();
+    const from = (process.env.SMTP_FROM ?? "").trim();
+    const plainSubject = `${type === "INSPECTION" ? "Book Inspection" : "Request Info"}: ${String((property as any).title ?? "")}`.trim();
+    const text = lines.join("\n");
+
+    if (canSendEmail()) {
+      try {
+        await sendInquiryEmail({
+          to,
+          from,
+          replyTo: email || undefined,
+          subject: plainSubject,
+          text,
+        });
+        return jsonOk({ id: String((created as any)._id), delivered: true });
+      } catch {
+        return jsonOk({ id: String((created as any)._id), delivered: false, mailto });
+      }
+    }
+
+    return jsonOk({ id: String((created as any)._id), delivered: false, mailto });
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) return jsonError(err.message, { status: 400 });
     return jsonError("Failed to submit inquiry.", { status: 500 });
   }
 }
-

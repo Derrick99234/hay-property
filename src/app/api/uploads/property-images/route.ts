@@ -56,8 +56,7 @@ export async function POST(req: NextRequest) {
     const slug = slugify(String((doc as any).slug ?? "")) || String((doc as any)._id ?? "");
     const key = `properties/${slug}/${crypto.randomUUID()}.${ext}`;
     const buf = new Uint8Array(await file.arrayBuffer());
-    const res = await putPublicObject({ key, body: buf, contentType: file.type });
-    console.log("Uploaded image:", key, res);
+    await putPublicObject({ key, body: buf, contentType: file.type });
     images.push({ url: getPublicUrl(key), order: i });
   }
 

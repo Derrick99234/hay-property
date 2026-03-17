@@ -15,6 +15,7 @@ export default function AdminUsersPage() {
   const pageSize = 8;
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -38,12 +39,16 @@ export default function AdminUsersPage() {
   };
 
   const onSubmit = async (input: { name: string; email: string; status: AdminUser["status"] }) => {
+    if (saving) return;
+    setSaving(true);
     try {
       if (!editing) return;
       await updateUser(editing.id, { name: input.name, email: input.email, status: input.status });
       setEditingId(null);
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -124,7 +129,7 @@ export default function AdminUsersPage() {
       </div>
 
       <Modal open={Boolean(editingId)} title="Edit user" onClose={() => setEditingId(null)}>
-        <UserForm initial={editing} onCancel={() => setEditingId(null)} onSubmit={onSubmit} />
+        <UserForm initial={editing} saving={saving} onCancel={() => setEditingId(null)} onSubmit={onSubmit} />
       </Modal>
     </div>
   );
@@ -132,10 +137,12 @@ export default function AdminUsersPage() {
 
 function UserForm({
   initial,
+  saving,
   onCancel,
   onSubmit,
 }: {
   initial: AdminUser | null;
+  saving: boolean;
   onCancel: () => void;
   onSubmit: (input: { name: string; email: string; status: AdminUser["status"] }) => void;
 }) {
@@ -143,7 +150,7 @@ function UserForm({
   const [email, setEmail] = useState(initial?.email ?? "");
   const [status, setStatus] = useState<AdminUser["status"]>(initial?.status ?? "ACTIVE");
 
-  const canSubmit = Boolean(initial) && name.trim().length > 1 && email.trim().includes("@");
+  const canSubmit = Boolean(initial) && name.trim().length > 1 && email.trim().includes("@") && !saving;
 
   return (
     <form
@@ -190,6 +197,7 @@ function UserForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={saving}
           className="h-10 rounded-full border border-zinc-200 bg-white px-6 text-sm font-semibold text-zinc-900 transition hover:border-zinc-300"
         >
           Cancel
@@ -200,7 +208,7 @@ function UserForm({
           className="h-10 rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
-          Save
+          {saving ? "Saving..." : "Save"}
         </button>
       </div>
     </form>

@@ -40,6 +40,7 @@ type AdminContextValue = {
       city: string;
       state: string;
       country: string;
+      keepImageUrls: string[];
       imageFiles: File[];
     }>
   ) => Promise<void>;
@@ -53,6 +54,7 @@ type AdminContextValue = {
     content: string;
     published: boolean;
     coverFile?: File | null;
+    coverUrl?: string;
   }) => Promise<void>;
   updateBlog: (id: string, input: Partial<Omit<AdminBlog, "id">> & { coverFile?: File | null }) => Promise<void>;
   deleteBlog: (id: string) => Promise<void>;
@@ -292,15 +294,18 @@ export default function AdminProvider({
       if (typeof input.city === "string") payload.city = input.city || undefined;
       if (typeof input.state === "string") payload.state = input.state || undefined;
       if (typeof input.country === "string") payload.country = input.country || undefined;
+      const existing = db.properties.find((p) => p.id === id);
+      const baseKeepUrls = Array.isArray(input.keepImageUrls) ? input.keepImageUrls : Array.isArray(existing?.imageUrls) ? existing!.imageUrls : [];
+      const keepUrls = baseKeepUrls.map((u) => String(u ?? "").trim()).filter(Boolean).slice(0, 5);
+      const propertySlug = typeof input.slug === "string" ? input.slug : String(existing?.slug ?? "");
+      let uploadedUrls: string[] = [];
       if (Array.isArray(input.imageFiles) && input.imageFiles.length) {
         const imageFiles = input.imageFiles.slice(0, 5);
-        const existing = db.properties.find((p) => p.id === id);
-        const propertySlug = typeof input.slug === "string" ? input.slug : String(existing?.slug ?? "");
         const uploaded = await uploadPropertyImages({ propertyId: id, propertySlug, files: imageFiles });
-        const existingUrls = Array.isArray(existing?.imageUrls) ? existing!.imageUrls : [];
-        const combinedUrls = [...existingUrls, ...uploaded.map((u) => u.url)].filter(Boolean).slice(0, 5);
-        payload.images = combinedUrls.map((url, idx) => ({ url, order: idx }));
+        uploadedUrls = uploaded.map((u) => u.url).filter(Boolean);
       }
+      const combinedUrls = [...keepUrls, ...uploadedUrls].filter(Boolean).slice(0, 5);
+      payload.images = combinedUrls.map((url, idx) => ({ url, order: idx }));
 
       const res = await fetch(`/api/properties/${encodeURIComponent(id)}`, {
         method: "PATCH",

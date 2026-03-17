@@ -16,6 +16,8 @@ export default function AdminPurchasesPage() {
 
   const [openCreate, setOpenCreate] = useState(false);
   const [editing, setEditing] = useState<AdminPurchase | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -48,6 +50,7 @@ export default function AdminPurchasesPage() {
         <button
           type="button"
           onClick={() => setOpenCreate(true)}
+          disabled={creating || saving}
           className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
@@ -149,11 +152,16 @@ export default function AdminPurchasesPage() {
 
       <Modal open={openCreate} title="New purchase" onClose={() => setOpenCreate(false)}>
         <CreatePurchaseForm
+          creating={creating}
           onCancel={() => setOpenCreate(false)}
           onSubmit={(input) =>
-            createPurchase(input)
-              .then(() => setOpenCreate(false))
-              .catch((err) => window.alert(err instanceof Error ? err.message : "Create failed."))
+            (creating
+              ? Promise.resolve()
+              : (setCreating(true),
+                createPurchase(input)
+                  .then(() => setOpenCreate(false))
+                  .catch((err) => window.alert(err instanceof Error ? err.message : "Create failed."))
+                  .finally(() => setCreating(false))))
           }
           users={db.users.map((u) => ({ id: u.id, label: `${u.name} (${u.email})` }))}
           properties={db.properties.map((p) => ({ id: p.id, label: `${p.title} (${p.slug})` }))}
@@ -164,11 +172,16 @@ export default function AdminPurchasesPage() {
         {editing ? (
           <UpdatePhasesForm
             purchase={editing}
+            saving={saving}
             onCancel={() => setEditing(null)}
             onSubmit={(steps) =>
-              updatePurchaseSteps(editing.id, { steps })
-                .then(() => setEditing(null))
-                .catch((err) => window.alert(err instanceof Error ? err.message : "Update failed."))
+              (saving
+                ? Promise.resolve()
+                : (setSaving(true),
+                  updatePurchaseSteps(editing.id, { steps })
+                    .then(() => setEditing(null))
+                    .catch((err) => window.alert(err instanceof Error ? err.message : "Update failed."))
+                    .finally(() => setSaving(false))))
             }
           />
         ) : null}
@@ -180,17 +193,19 @@ export default function AdminPurchasesPage() {
 function CreatePurchaseForm({
   users,
   properties,
+  creating,
   onCancel,
   onSubmit,
 }: {
   users: Array<{ id: string; label: string }>;
   properties: Array<{ id: string; label: string }>;
+  creating: boolean;
   onCancel: () => void;
-  onSubmit: (input: { userId: string; propertyId: string }) => void;
+  onSubmit: (input: { userId: string; propertyId: string }) => Promise<void> | void;
 }) {
   const [userId, setUserId] = useState(users[0]?.id ?? "");
   const [propertyId, setPropertyId] = useState(properties[0]?.id ?? "");
-  const canSubmit = Boolean(userId) && Boolean(propertyId);
+  const canSubmit = Boolean(userId) && Boolean(propertyId) && !creating;
 
   return (
     <form
@@ -231,6 +246,7 @@ function CreatePurchaseForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={creating}
           className="h-10 rounded-full border border-zinc-200 bg-white px-5 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-900 transition hover:border-zinc-300"
         >
           Cancel
@@ -241,7 +257,7 @@ function CreatePurchaseForm({
           className="h-10 rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
-          Create
+          {creating ? "Creating..." : "Create"}
         </button>
       </div>
     </form>
@@ -250,12 +266,14 @@ function CreatePurchaseForm({
 
 function UpdatePhasesForm({
   purchase,
+  saving,
   onCancel,
   onSubmit,
 }: {
   purchase: AdminPurchase;
+  saving: boolean;
   onCancel: () => void;
-  onSubmit: (steps: Record<string, boolean>) => void;
+  onSubmit: (steps: Record<string, boolean>) => Promise<void> | void;
 }) {
   const initial = useMemo(() => {
     const o: Record<string, boolean> = {};
@@ -309,16 +327,18 @@ function UpdatePhasesForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={saving}
           className="h-10 rounded-full border border-zinc-200 bg-white px-5 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-900 transition hover:border-zinc-300"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="h-10 rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95"
+          disabled={saving}
+          className="h-10 rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
-          Save
+          {saving ? "Saving..." : "Save"}
         </button>
       </div>
     </form>
@@ -351,4 +371,3 @@ function IconSearch({ className }: { className?: string }) {
     </svg>
   );
 }
-

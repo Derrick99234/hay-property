@@ -14,6 +14,11 @@ function formatMoney(value: number, currency: string) {
   return safe.toLocaleString(undefined, { style: "currency", currency: cur, maximumFractionDigits: 0 });
 }
 
+function createLocalId() {
+  const g = globalThis as unknown as { crypto?: Crypto };
+  return g.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random()}`.replaceAll(".", "");
+}
+
 export default function AdminPropertiesPage() {
   const { db, createProperty, updateProperty, deleteProperty } = useAdminDB();
   const [query, setQuery] = useState("");
@@ -22,6 +27,7 @@ export default function AdminPropertiesPage() {
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -72,14 +78,19 @@ export default function AdminPropertiesPage() {
     city: string;
     state: string;
     country: string;
+    keepImageUrls: string[];
     imageFiles: File[];
   }) => {
+    if (saving) return;
+    setSaving(true);
     try {
       if (editing) await updateProperty(editing.id, input);
       else await createProperty(input);
       setOpen(false);
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -95,6 +106,7 @@ export default function AdminPropertiesPage() {
         <button
           type="button"
           onClick={startCreate}
+          disabled={saving}
           className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
@@ -178,7 +190,7 @@ export default function AdminPropertiesPage() {
       </div>
 
       <Modal open={open} title={editing ? "Edit property" : "Add property"} onClose={() => setOpen(false)}>
-        <PropertyForm initial={editing} onCancel={() => setOpen(false)} onSubmit={onSubmit} />
+        <PropertyForm initial={editing} saving={saving} onCancel={() => setOpen(false)} onSubmit={onSubmit} />
       </Modal>
     </div>
   );
@@ -186,10 +198,12 @@ export default function AdminPropertiesPage() {
 
 function PropertyForm({
   initial,
+  saving,
   onCancel,
   onSubmit,
 }: {
   initial: AdminProperty | null;
+  saving: boolean;
   onCancel: () => void;
   onSubmit: (input: {
     title: string;
@@ -203,9 +217,13 @@ function PropertyForm({
     city: string;
     state: string;
     country: string;
+    keepImageUrls: string[];
     imageFiles: File[];
   }) => void;
 }) {
+  type KeepImage = { id: string; url: string };
+  type NewImage = { id: string; file: File; preview: string };
+
   const initialTitle = initial?.title ?? "";
   const initialSlug = initial?.slug ?? "";
   const [title, setTitle] = useState(initial?.title ?? "");
@@ -216,10 +234,22 @@ function PropertyForm({
   const [city, setCity] = useState(initial?.city ?? "");
   const [state, setState] = useState(initial?.state ?? "");
   const [country, setCountry] = useState(initial?.country ?? "Nigeria");
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [keepImages, setKeepImages] = useState<KeepImage[]>(
+    Array.isArray(initial?.imageUrls) ? initial!.imageUrls.map((url) => ({ id: createLocalId(), url })) : []
+  );
+  const [newImages, setNewImages] = useState<NewImage[]>([]);
   const [price, setPrice] = useState(typeof initial?.price === "number" ? String(initial.price) : "");
   const [currency, setCurrency] = useState(initial?.currency ?? "NGN");
   const [status, setStatus] = useState<AdminProperty["status"]>(initial?.status ?? "DRAFT");
+
+  useEffect(() => {
+    const urls = Array.isArray(initial?.imageUrls) ? initial!.imageUrls : [];
+    setKeepImages(urls.map((url) => ({ id: createLocalId(), url })));
+    setNewImages((prev) => {
+      for (const img of prev) URL.revokeObjectURL(img.preview);
+      return [];
+    });
+  }, [initial?.id]);
 
   useEffect(() => {
     const nextTitle = title.trim();
@@ -235,15 +265,15 @@ function PropertyForm({
   }, [initial, initialSlug, initialTitle, title]);
 
   const parsedPrice = Number(price.replaceAll(",", ""));
-  const existingImages = initial?.imageUrls?.length ?? 0;
-  const imageCount = initial ? existingImages + imageFiles.length : imageFiles.length;
+  const imageCount = (initial ? keepImages.length : 0) + newImages.length;
   const canSubmit =
     title.trim().length > 2 &&
     slug.trim().length > 2 &&
     (city.trim().length > 1 || state.trim().length > 1 || address.trim().length > 1) &&
     Number.isFinite(parsedPrice) &&
     parsedPrice >= 0 &&
-    imageCount <= 5;
+    imageCount <= 5 &&
+    !saving;
 
   return (
     <form
@@ -259,7 +289,8 @@ function PropertyForm({
             .map((x) => x.trim())
             .filter(Boolean)
             .slice(0, 20),
-          imageFiles,
+          keepImageUrls: keepImages.map((img) => img.url).map((u) => String(u ?? "").trim()).filter(Boolean).slice(0, 5),
+          imageFiles: newImages.map((img) => img.file),
           price: parsedPrice,
           currency: currency.trim() || "NGN",
           status,
@@ -376,17 +407,72 @@ function PropertyForm({
 
       <Field label={initial ? "Images (add files, up to 5 total)" : "Images (0–5 files)"}>
         <div className="space-y-2">
-          {initial?.imageUrls?.length ? (
-            <div className="text-xs text-zinc-500">Current images: {initial.imageUrls.length}</div>
+          {initial && keepImages.length ? (
+            <div className="space-y-2">
+              <div className="text-xs text-zinc-500">Current images</div>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {keepImages.slice(0, 5).map((img) => (
+                  <div key={img.id} className="relative overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200">
+                    <img src={img.url} alt="" className="h-16 w-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                    <button
+                      type="button"
+                      onClick={() => setKeepImages((prev) => prev.filter((x) => x.id !== img.id))}
+                      disabled={saving}
+                      className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-white/90 text-xs font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label="Remove image"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : null}
+
+          {newImages.length ? (
+            <div className="space-y-2">
+              <div className="text-xs text-zinc-500">New uploads</div>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {newImages.map((img) => (
+                  <div key={img.id} className="relative overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200">
+                    <img src={img.preview} alt="" className="h-16 w-full object-cover" loading="lazy" />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNewImages((prev) => {
+                          const target = prev.find((x) => x.id === img.id);
+                          if (target) URL.revokeObjectURL(target.preview);
+                          return prev.filter((x) => x.id !== img.id);
+                        })
+                      }
+                      disabled={saving}
+                      className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-white/90 text-xs font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label="Remove file"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
             onChange={(e) => {
               const files = Array.from(e.target.files ?? []);
-              const remaining = initial ? Math.max(0, 5 - (initial.imageUrls?.length ?? 0)) : 5;
-              setImageFiles(files.slice(0, remaining));
+              e.currentTarget.value = "";
+              setNewImages((prev) => {
+                const remaining = Math.max(0, 5 - keepImages.length - prev.length);
+                if (remaining <= 0) return prev;
+                const next = [...prev];
+                for (const f of files.slice(0, remaining)) {
+                  next.push({ id: createLocalId(), file: f, preview: URL.createObjectURL(f) });
+                }
+                return next;
+              });
             }}
             className="block w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-zinc-300"
           />
@@ -413,6 +499,7 @@ function PropertyForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={saving}
           className="h-10 rounded-full cursor-pointer border border-zinc-200 bg-white px-5 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-900 transition hover:border-zinc-300"
         >
           Cancel
@@ -423,7 +510,7 @@ function PropertyForm({
           className="h-10 cursor-pointer rounded-full px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
         >
-          Save
+          {saving ? "Saving..." : "Save"}
         </button>
       </div>
     </form>
