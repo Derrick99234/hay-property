@@ -5,6 +5,7 @@ import Modal from "../../_components/Modal";
 import Pagination from "../../_components/Pagination";
 import { useAdminDB } from "../../_components/AdminProvider";
 import { AdminProperty, formatDateShort } from "../../_lib/adminStore";
+import Image from "next/image";
 
 const ACCENT = "#f2555d";
 
@@ -410,16 +411,40 @@ function PropertyForm({
           {initial && keepImages.length ? (
             <div className="space-y-2">
               <div className="text-xs text-zinc-500">Current images</div>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {keepImages.slice(0, 5).map((img) => (
-                  <div key={img.id} className="relative overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200">
-                    <img src={img.url} alt="" className="h-16 w-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                  <div key={img.id} className="relative overflow-hidden rounded-2xl bg-zinc-100 ring-1 ring-zinc-200">
+                    <div className="h-36 w-full">
+                      <Image src={img.url} alt=""
+                        width={200}
+                        height={200}
+                        className="h-36 w-full object-cover" loading="lazy" referrerPolicy="no-referrer" draggable={false} />
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setKeepImages((prev) => prev.filter((x) => x.id !== img.id))}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log(e)
+                        console.log(`Deleting image ${img.url}`)
+                        console.log(`Property ID: ${initial.id}`)
+                        if (!initial?.id) return;
+                        if (!window.confirm("Delete this image from the server?")) return;
+                        fetch("/api/uploads/property-images", {
+                          method: "DELETE",
+                          headers: { "content-type": "application/json" },
+                          body: JSON.stringify({ propertyId: initial.id, url: img.url }),
+                        })
+                          .then(async (r) => {
+                            const payload = (await r.json()) as { ok: boolean; error?: string };
+                            if (!payload.ok) throw new Error(payload.error || "Failed to delete image.");
+                            setKeepImages((prev) => prev.filter((x) => x.id !== img.id));
+                          })
+                          .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to delete image."));
+                      }}
                       disabled={saving}
-                      className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-white/90 text-xs font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
-                      aria-label="Remove image"
+                      className="absolute cursor-pointer right-2 top-2 grid size-9 place-items-center rounded-full bg-white/90 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label="Delete image"
                     >
                       ×
                     </button>
@@ -432,10 +457,10 @@ function PropertyForm({
           {newImages.length ? (
             <div className="space-y-2">
               <div className="text-xs text-zinc-500">New uploads</div>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {newImages.map((img) => (
-                  <div key={img.id} className="relative overflow-hidden rounded-xl bg-zinc-100 ring-1 ring-zinc-200">
-                    <img src={img.preview} alt="" className="h-16 w-full object-cover" loading="lazy" />
+                  <div key={img.id} className="relative overflow-hidden rounded-2xl bg-zinc-100 ring-1 ring-zinc-200">
+                    <img src={img.preview} alt="" className="h-36 w-full select-none object-cover" loading="lazy" draggable={false} />
                     <button
                       type="button"
                       onClick={() =>
@@ -446,8 +471,8 @@ function PropertyForm({
                         })
                       }
                       disabled={saving}
-                      className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-white/90 text-xs font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
-                      aria-label="Remove file"
+                      className="absolute right-2 top-2 grid size-9 place-items-center rounded-full bg-white/90 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label="Cancel upload"
                     >
                       ×
                     </button>
@@ -519,10 +544,10 @@ function PropertyForm({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block space-y-2">
-      <div className="text-xs font-semibold text-zinc-600">{label}</div>
+    <div className="block space-y-2">
+      <label className="text-xs font-semibold text-zinc-600">{label}</label>
       {children}
-    </label>
+    </div>
   );
 }
 

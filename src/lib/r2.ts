@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 function requiredEnv(name: string) {
   const v = process.env[name];
@@ -59,4 +59,12 @@ export async function putPublicObject(params: { key: string; body: Uint8Array; c
       CacheControl: "public, max-age=31536000, immutable",
     })
   );
+}
+
+export async function deletePublicObject(key: string) {
+  const bucket = requiredEnv("R2_BUCKET_NAME");
+  const client = getR2Client();
+  const cleanKey = String(key ?? "").replace(/^\/+/, "");
+  if (!cleanKey) throw new Error("Missing key.");
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: cleanKey }));
 }

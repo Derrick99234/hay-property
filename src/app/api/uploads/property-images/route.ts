@@ -2,10 +2,10 @@ import type { NextRequest } from "next/server";
 import crypto from "crypto";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../../lib/mongodb";
-import { putPublicObject, getPublicUrl } from "../../../../lib/r2";
+import { deletePublicObject, getPublicUrl, putPublicObject } from "../../../../lib/r2";
 import { Property } from "../../../../models/Property";
 import { isAdmin } from "../../_lib/auth";
-import { jsonError, jsonOk, slugify } from "../../_lib/http";
+import { jsonError, jsonOk, readJsonBody, slugify } from "../../_lib/http";
 
 export const runtime = "nodejs";
 
@@ -61,4 +61,33 @@ export async function POST(req: NextRequest) {
   }
 
   return jsonOk({ images }, { status: 201 });
+}
+
+export async function DELETE(req: NextRequest) {
+  if (!(await isAdmin(req))) return jsonError("Unauthorized.", { status: 401 });
+  await connectMongo();
+
+  const body = await readJsonBody<{ propertyId?: string; url?: string }>(req);
+  const propertyId = String(body.propertyId ?? "").trim();
+  const url = String(body.url ?? "").trim();
+  if (!mongoose.isValidObjectId(propertyId)) return jsonError("Invalid propertyId.", { status: 400 });
+  if (!url) return jsonError("Missing url.", { status: 400 });
+
+  const doc = await Property.findById(propertyId, { _id: 1, slug: 1 }).lean();
+  if (!doc) return jsonError("Not found.", { status: 404 });
+
+  let key = "";
+  try {
+    const u = new URL(url);
+    key = u.pathname.replace(/^\/+/, "");
+  } catch {
+    return jsonError("Invalid url.", { status: 400 });
+  }
+
+  const slug = slugify(String((doc as any).slug ?? "")) || String((doc as any)._id ?? "");
+  const prefix = `properties/${slug}/`;
+  if (!key.startsWith(prefix)) return jsonError("Invalid image key.", { status: 400 });
+
+  await deletePublicObject(key);
+  return jsonOk({ deleted: true });
 }
