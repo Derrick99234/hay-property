@@ -78,7 +78,7 @@ export default async function Home() {
       }).lean(),
     ]);
     latestProperties = res[0];
-    featuredProperties = res[1];
+    featuredProperties = res[0];
     latestPosts = res[2];
   } catch {
     dbError = true;
@@ -215,61 +215,61 @@ export default async function Home() {
               <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {latestProperties.length > 0
                   ? latestProperties.slice(0, 3).map((p) => {
-                      const id = String((p as any)._id ?? "");
-                      const slug = String((p as any).slug ?? "");
-                      const title = String((p as any).title ?? "");
-                      const city = String((p as any).city ?? "");
-                      const state = String((p as any).state ?? "");
-                      const location = [city, state].filter(Boolean).join(", ");
-                      const coverUrl = String((p as any).images?.[0]?.url ?? "").trim() || undefined;
-                      const price = formatMoney(
-                        Number((p as any).price ?? 0),
-                        String((p as any).currency ?? "NGN"),
-                      );
-                      return (
-                        <div key={id} className="relative">
-                          <PropertyCard
-                            title={title}
-                            location={location || "—"}
-                            price={price}
-                            showBrand
-                            imageUrl={coverUrl}
-                            accent={ACCENT}
-                            href={slug ? `/properties/${slug}` : "/properties"}
-                          />
-                        </div>
-                      );
-                    })
+                    const id = String((p as any)._id ?? "");
+                    const slug = String((p as any).slug ?? "");
+                    const title = String((p as any).title ?? "");
+                    const city = String((p as any).city ?? "");
+                    const state = String((p as any).state ?? "");
+                    const location = [city, state].filter(Boolean).join(", ");
+                    const coverUrl = String((p as any).images?.[0]?.url ?? "").trim() || undefined;
+                    const price = formatMoney(
+                      Number((p as any).price ?? 0),
+                      String((p as any).currency ?? "NGN"),
+                    );
+                    return (
+                      <div key={id} className="relative">
+                        <PropertyCard
+                          title={title}
+                          location={location || "—"}
+                          price={price}
+                          showBrand
+                          imageUrl={coverUrl}
+                          accent={ACCENT}
+                          href={slug ? `/properties/${slug}` : "/properties"}
+                        />
+                      </div>
+                    );
+                  })
                   : [
-                      <PropertyCard
-                        key="fallback-a"
-                        title="Pride Rock Estate"
-                        location="Ibeju-Lekki, Lagos"
-                        price={formatMoney(12750000, "NGN")}
-                        showBrand
-                        imageUrl={undefined}
-                        accent={ACCENT}
-                        href="/properties"
-                      />,
-                      <PropertyCard
-                        key="fallback-b"
-                        title="Emerald Gardens Residence"
-                        location="Lekki, Lagos"
-                        price={formatMoney(38500000, "NGN")}
-                        imageUrl={undefined}
-                        accent={ACCENT}
-                        href="/properties"
-                      />,
-                      <PropertyCard
-                        key="fallback-c"
-                        title="Cedarview Apartments"
-                        location="Wuse 2, Abuja"
-                        price={formatMoney(22000000, "NGN")}
-                        imageUrl={undefined}
-                        accent={ACCENT}
-                        href="/properties"
-                      />,
-                    ]}
+                    <PropertyCard
+                      key="fallback-a"
+                      title="Pride Rock Estate"
+                      location="Ibeju-Lekki, Lagos"
+                      price={formatMoney(12750000, "NGN")}
+                      showBrand
+                      imageUrl={undefined}
+                      accent={ACCENT}
+                      href="/properties"
+                    />,
+                    <PropertyCard
+                      key="fallback-b"
+                      title="Emerald Gardens Residence"
+                      location="Lekki, Lagos"
+                      price={formatMoney(38500000, "NGN")}
+                      imageUrl={undefined}
+                      accent={ACCENT}
+                      href="/properties"
+                    />,
+                    <PropertyCard
+                      key="fallback-c"
+                      title="Cedarview Apartments"
+                      location="Wuse 2, Abuja"
+                      price={formatMoney(22000000, "NGN")}
+                      imageUrl={undefined}
+                      accent={ACCENT}
+                      href="/properties"
+                    />,
+                  ]}
               </div>
               {dbError ? (
                 <div className="mt-6 text-xs text-zinc-500">
@@ -335,7 +335,7 @@ export default async function Home() {
                   ? featuredProperties
                   : latestProperties
                 )
-                  .slice(0, 4)
+                  .slice(-2)
                   .map((p, idx) => {
                     const id = String((p as any)._id ?? `fallback_${idx}`);
                     const slug = String((p as any).slug ?? "");
