@@ -11,6 +11,7 @@ import { IconArrowUpRight, IconPin, IconShield, IconSpark, IconStar } from "../i
 import Image from "next/image";
 import FaqAccordion, { type FaqItem } from "../FaqAccordion";
 import Link from "next/link";
+import FlyerPortfolioSection, { type FlyerPortfolioItem } from "./FlyerPortfolioSection";
 
 export type HomePropertyCard = {
   id: string;
@@ -30,6 +31,109 @@ export type HomeBlogCard = {
   excerpt: string;
   coverUrl?: string;
 };
+
+const FLYERS: FlyerPortfolioItem[] = [
+  {
+    id: "harvest-grove-acre-hectares",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/Acre%20and%20Hectares.jpeg",
+    badge: "Acre & hectares",
+    name: "Harvest Grove",
+    title: "Farm 33 initiative",
+    primaryPrice: "₦4.5M / acre",
+    deposit: "₦500K",
+    priceLines: ["1 acre: ₦4.5M", "1 hectare: ₦11.196M"],
+    highlights: ["Oil palm", "Developed by HAY Property Ltd."],
+  },
+  {
+    id: "greenfield-discount",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/GREENFIELD%20DISCOUNT%20SALES.jpeg",
+    badge: "Discount sales",
+    name: "Greenfield",
+    location: "Omu-Epe, Lagos",
+    title: "Freehold (C of O in view)",
+    primaryPrice: "₦9.22M (300sqm)",
+    deposit: "₦2M",
+    priceLines: ["300sqm: ₦9.72M → ₦9.22M", "500sqm: ₦16.2M → ₦15.7M"],
+    highlights: ["Limited-time deal", "Flexible payment option available"],
+  },
+  {
+    id: "greenfield",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/GREENFIELD.jpeg",
+    badge: "New listing",
+    name: "Greenfield",
+    location: "Omu-Epe, Lagos",
+    title: "Freehold (C of O in view)",
+    primaryPrice: "₦1.62M (300sqm)",
+    deposit: "₦300K",
+    priceLines: ["300sqm: ₦1.62M", "500sqm: ₦2.5M"],
+    highlights: ["Accessible location", "Verified documentation"],
+  },
+  {
+    id: "hg-intro",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/HG.jpeg",
+    badge: "Introducing",
+    name: "Harvest Grove",
+    highlights: ["Developed by HAY Property Ltd.", "An initiative by Farm 33"],
+  },
+  {
+    id: "ireti-phase-2",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/IRETI%20NEW%20PRICE.jpeg",
+    badge: "New price",
+    name: "Ireti Residence (Phase 2)",
+    location: "Imota, Ikorodu",
+    title: "Freehold (C of O in view)",
+    primaryPrice: "₦1.5M (300sqm)",
+    deposit: "₦300K",
+    priceLines: ["300sqm: ₦1.5M", "500sqm: ₦2.5M"],
+    highlights: ["Secure investment option", "Flexible payment plan"],
+  },
+  {
+    id: "northern-park",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/NORTHERN%20PARK.jpeg",
+    badge: "Phase II",
+    name: "Northernpark (Phase II)",
+    location: "Araga, Epe",
+    title: "Freehold (C of O in view)",
+    primaryPrice: "₦4.2M (300sqm)",
+    deposit: "₦500K",
+    priceLines: ["300sqm: ₦4.2M", "500sqm: ₦7M"],
+    highlights: ["High growth potential", "Verified documentation"],
+  },
+  {
+    id: "pride-rock",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/PRICE%20ROCK.jpeg",
+    badge: "Ibadan",
+    name: "Pride Rock",
+    location: "Moniya–Iseyin Expressway, Ibadan",
+    title: "Freehold (C of O in view)",
+    primaryPrice: "₦897K (300sqm)",
+    deposit: "₦300K",
+    priceLines: ["300sqm: ₦897K", "500sqm: ₦1.040M", "1 acre: ₦5.096M", "2 acres: ₦7.914M"],
+    highlights: ["Flexible payment plan", "Instant allocation (terms apply)"],
+  },
+  {
+    id: "harvest-grove-plots",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/Plots.jpeg",
+    badge: "Co-own an acre",
+    name: "Harvest Grove",
+    primaryPrice: "₦750K (1 plot)",
+    deposit: "₦200K",
+    priceLines: ["1 plot: ₦750K"],
+    highlights: ["Oil palm", "Developed by HAY Property Ltd."],
+  },
+  {
+    id: "northern-park-discount",
+    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/SALES%20DISCOUNT%20NORTHERN%20PARK.jpeg",
+    badge: "Discount sales",
+    name: "Northernpark (Phase II)",
+    location: "Araga, Epe",
+    title: "Freehold (C of O in view)",
+    primaryPrice: "₦24.5M (300sqm)",
+    deposit: "₦5M",
+    priceLines: ["300sqm: ₦25.2M → ₦24.5M", "500sqm: ₦42M → ₦41.5M"],
+    highlights: ["Limited-time deal", "Verified documentation"],
+  },
+];
 
 export default function HomeClient(props: {
   accent: string;
@@ -290,6 +394,10 @@ export default function HomeClient(props: {
             </section>
           </Reveal>
 
+          <Reveal delayMs={95}>
+            <FlyerPortfolioSection accent={ACCENT} items={FLYERS} />
+          </Reveal>
+
           <Reveal delayMs={110}>
             <section id="latest" className="mt-20">
               <div className="flex flex-wrap items-end justify-between gap-4">
@@ -440,7 +548,7 @@ export default function HomeClient(props: {
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/10 via-transparent to-transparent" />
                     <Parallax className="absolute inset-0" strength={18}>
-                      <Image src={ABOUT_IMAGE} alt="Land" width={1400} height={933} className="h-full w-full object-cover" loading="lazy" />
+                      <Image src={"https://pub-edd6261085894e2db893376ace3b663e.r2.dev/pages-image/ready%20to%20own%20land.jpg"} alt="Land" width={1400} height={933} className="h-full w-full object-cover" loading="lazy" />
                     </Parallax>
                   </ImageReveal>
                 </div>
@@ -554,4 +662,3 @@ export default function HomeClient(props: {
     </div>
   );
 }
-
