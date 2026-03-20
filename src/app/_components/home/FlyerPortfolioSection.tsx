@@ -3,11 +3,12 @@
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type FlyerPortfolioItem = {
   id: string;
   imageUrl: string;
+  propertyHref?: string;
   badge?: string;
   name: string;
   location?: string;
@@ -35,6 +36,9 @@ export default function FlyerPortfolioSection({
   const flyers = useMemo(() => (Array.isArray(items) ? items : []).filter((x) => x && x.id && x.imageUrl), [items]);
   const [index, setIndex] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
+  const [paused, setPaused] = useState(false);
+  const resumeTimer = useRef<number | null>(null);
+  const startX = useRef<number | null>(null);
 
   const current = flyers[index] ?? null;
 
@@ -56,6 +60,28 @@ export default function FlyerPortfolioSection({
     setDir(normalized > index ? 1 : -1);
     setIndex(normalized);
   };
+
+  const pauseTemporarily = (ms = 9000) => {
+    setPaused(true);
+    if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    resumeTimer.current = window.setTimeout(() => setPaused(false), ms);
+  };
+
+  useEffect(() => {
+    if (!flyers.length) return;
+    if (paused) return;
+    const id = window.setInterval(() => {
+      setDir(1);
+      setIndex((prev) => (prev + 1) % flyers.length);
+    }, 6500);
+    return () => window.clearInterval(id);
+  }, [flyers.length, paused]);
+
+  useEffect(() => {
+    return () => {
+      if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    };
+  }, []);
 
   if (!flyers.length) return null;
 
@@ -88,7 +114,10 @@ export default function FlyerPortfolioSection({
               <div className="absolute inset-y-0 left-0 z-10 flex items-center">
                 <button
                   type="button"
-                  onClick={() => go(index - 1)}
+                  onClick={() => {
+                    pauseTemporarily();
+                    go(index - 1);
+                  }}
                   className="ml-3 grid size-10 place-items-center rounded-full bg-white/90 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 transition hover:bg-white"
                   aria-label="Previous flyer"
                 >
@@ -98,7 +127,10 @@ export default function FlyerPortfolioSection({
               <div className="absolute inset-y-0 right-0 z-10 flex items-center">
                 <button
                   type="button"
-                  onClick={() => go(index + 1)}
+                  onClick={() => {
+                    pauseTemporarily();
+                    go(index + 1);
+                  }}
                   className="mr-3 grid size-10 place-items-center rounded-full bg-white/90 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-zinc-200 transition hover:bg-white"
                   aria-label="Next flyer"
                 >
@@ -106,7 +138,25 @@ export default function FlyerPortfolioSection({
                 </button>
               </div>
 
-              <div className="relative h-150 overflow-hidden rounded-[26px] bg-zinc-200">
+              <div
+                className="relative h-150 overflow-hidden rounded-[26px] bg-zinc-200"
+                onPointerEnter={() => setPaused(true)}
+                onPointerLeave={() => setPaused(false)}
+                onTouchStart={() => pauseTemporarily()}
+                onPointerDown={(e) => {
+                  startX.current = e.clientX;
+                }}
+                onPointerUp={(e) => {
+                  const s = startX.current;
+                  startX.current = null;
+                  if (typeof s !== "number") return;
+                  const dx = e.clientX - s;
+                  if (Math.abs(dx) < 45) return;
+                  pauseTemporarily();
+                  if (dx < 0) go(index + 1);
+                  else go(index - 1);
+                }}
+              >
                 <AnimatePresence mode="wait" custom={dir}>
                   {current ? (
                     <motion.div
@@ -140,7 +190,10 @@ export default function FlyerPortfolioSection({
                     <button
                       key={f.id}
                       type="button"
-                      onClick={() => go(i)}
+                      onClick={() => {
+                        pauseTemporarily();
+                        go(i);
+                      }}
                       className={[
                         "h-2 rounded-full transition",
                         active ? "w-8" : "w-2 hover:w-4",
@@ -219,18 +272,18 @@ export default function FlyerPortfolioSection({
 
                     <div className="flex flex-wrap items-center gap-3 pt-1">
                       <Link
-                        href={current.imageUrl}
-                        target="_blank"
+                        href={current.propertyHref || "/properties"}
                         className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
                         style={{ backgroundColor: accent, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
                       >
-                        View
+                        View property
                       </Link>
                       <Link
-                        href="/properties"
+                        href={current.imageUrl}
+                        target="_blank"
                         className="inline-flex h-10 items-center justify-center rounded-full border border-zinc-200 bg-white px-6 text-sm font-semibold text-zinc-900 shadow-sm transition hover:border-zinc-300"
                       >
-                        Browse other properties
+                        View flyer
                       </Link>
                     </div>
                   </motion.div>

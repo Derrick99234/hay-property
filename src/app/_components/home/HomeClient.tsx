@@ -5,7 +5,6 @@ import SiteFooter from "../SiteFooter";
 import SiteHeader from "../SiteHeader";
 import CategoryPill from "./CategoryPill";
 import { PropertyCard, WidePropertyCard } from "./PropertyCards";
-import AutoMarquee from "../AutoMarquee";
 import { Float, HoverLift, ImageReveal, InView, Parallax, Reveal, Stagger } from "../Motion";
 import { IconArrowUpRight, IconPin, IconShield, IconSpark, IconStar } from "../icons";
 import Image from "next/image";
@@ -43,6 +42,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦500K",
     priceLines: ["1 acre: ₦4.5M", "1 hectare: ₦11.196M"],
     highlights: ["Oil palm", "Developed by HAY Property Ltd."],
+    propertyHref: "/properties/harvest-grove-agro-estate",
   },
   {
     id: "greenfield-discount",
@@ -55,6 +55,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦2M",
     priceLines: ["300sqm: ₦9.72M → ₦9.22M", "500sqm: ₦16.2M → ₦15.7M"],
     highlights: ["Limited-time deal", "Flexible payment option available"],
+    propertyHref: "/properties/greenfield-estate",
   },
   {
     id: "greenfield",
@@ -67,6 +68,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦300K",
     priceLines: ["300sqm: ₦1.62M", "500sqm: ₦2.5M"],
     highlights: ["Accessible location", "Verified documentation"],
+    propertyHref: "/properties/greenfield-estate",
   },
   {
     id: "hg-intro",
@@ -74,6 +76,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     badge: "Introducing",
     name: "Harvest Grove",
     highlights: ["Developed by HAY Property Ltd.", "An initiative by Farm 33"],
+    propertyHref: "/properties/harvest-grove-agro-estate",
   },
   {
     id: "ireti-phase-2",
@@ -86,6 +89,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦300K",
     priceLines: ["300sqm: ₦1.5M", "500sqm: ₦2.5M"],
     highlights: ["Secure investment option", "Flexible payment plan"],
+    propertyHref: "/properties/ireti-residence-phase-i",
   },
   {
     id: "northern-park",
@@ -98,6 +102,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦500K",
     priceLines: ["300sqm: ₦4.2M", "500sqm: ₦7M"],
     highlights: ["High growth potential", "Verified documentation"],
+    propertyHref: "/properties/northern-park-phase-ii-2",
   },
   {
     id: "pride-rock",
@@ -110,6 +115,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦300K",
     priceLines: ["300sqm: ₦897K", "500sqm: ₦1.040M", "1 acre: ₦5.096M", "2 acres: ₦7.914M"],
     highlights: ["Flexible payment plan", "Instant allocation (terms apply)"],
+    propertyHref: "/properties/pride-rock-estate",
   },
   {
     id: "harvest-grove-plots",
@@ -120,6 +126,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦200K",
     priceLines: ["1 plot: ₦750K"],
     highlights: ["Oil palm", "Developed by HAY Property Ltd."],
+    propertyHref: "/properties/harvest-grove-agro-estate",
   },
   {
     id: "northern-park-discount",
@@ -132,6 +139,7 @@ const FLYERS: FlyerPortfolioItem[] = [
     deposit: "₦5M",
     priceLines: ["300sqm: ₦25.2M → ₦24.5M", "500sqm: ₦42M → ₦41.5M"],
     highlights: ["Limited-time deal", "Verified documentation"],
+    propertyHref: "/properties/northern-park-phase-ii-2",
   },
 ];
 
@@ -285,62 +293,64 @@ export default function HomeClient(props: {
                   </div>
 
                   <div className="sm:hidden">
-                    <AutoMarquee className="-mx-8 px-8 py-1" speed={0.55}>
-                      <div className="w-[280px]">
-                        <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-                          <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(242,85,93,0.10)]" style={{ color: ACCENT }}>
-                            <IconShield accent={ACCENT} />
+                    <div className="-mx-8 overflow-x-auto px-8 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      <div className="flex w-max snap-x snap-mandatory items-stretch gap-4 pr-4">
+                        <div className="w-[280px] shrink-0 snap-start">
+                          <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+                            <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(242,85,93,0.10)]" style={{ color: ACCENT }}>
+                              <IconShield accent={ACCENT} />
+                            </div>
+                            <div className="mt-4 text-sm font-semibold text-zinc-900">Verified documentation</div>
+                            <div className="mt-2 text-sm leading-7 text-zinc-600">Clear paperwork and transparent disclosures so you understand what you’re buying.</div>
                           </div>
-                          <div className="mt-4 text-sm font-semibold text-zinc-900">Verified documentation</div>
-                          <div className="mt-2 text-sm leading-7 text-zinc-600">Clear paperwork and transparent disclosures so you understand what you’re buying.</div>
+                        </div>
+                        <div className="w-[280px] shrink-0 snap-start">
+                          <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+                            <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(29,43,86,0.10)]" style={{ color: NAVY }}>
+                              <IconShield accent={NAVY} />
+                            </div>
+                            <div className="mt-4 text-sm font-semibold text-zinc-900">Secure investment option</div>
+                            <div className="mt-2 text-sm leading-7 text-zinc-600">A process designed for confidence: verification, support, and clear next steps.</div>
+                          </div>
+                        </div>
+                        <div className="w-[280px] shrink-0 snap-start">
+                          <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+                            <div className="grid size-12 place-items-center rounded-2xl bg-zinc-50 ring-1 ring-zinc-100" style={{ color: ACCENT }}>
+                              <IconSpark accent={ACCENT} />
+                            </div>
+                            <div className="mt-4 text-sm font-semibold text-zinc-900">Flexible payment plan</div>
+                            <div className="mt-2 text-sm leading-7 text-zinc-600">Installment options vary by listing. Request info to see available plans and terms.</div>
+                          </div>
+                        </div>
+                        <div className="w-[280px] shrink-0 snap-start">
+                          <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+                            <div className="grid size-12 place-items-center rounded-2xl bg-zinc-50 ring-1 ring-zinc-100 text-zinc-800">
+                              <IconArrowUpRight />
+                            </div>
+                            <div className="mt-4 text-sm font-semibold text-zinc-900">Instant allocation (terms apply)</div>
+                            <div className="mt-2 text-sm leading-7 text-zinc-600">Where available, allocation is delivered based on the project’s stated requirements.</div>
+                          </div>
+                        </div>
+                        <div className="w-[280px] shrink-0 snap-start">
+                          <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+                            <div className="grid size-12 place-items-center rounded-2xl bg-zinc-50 ring-1 ring-zinc-100 text-zinc-800">
+                              <IconPin className="text-zinc-800" />
+                            </div>
+                            <div className="mt-4 text-sm font-semibold text-zinc-900">Accessible locations</div>
+                            <div className="mt-2 text-sm leading-7 text-zinc-600">Listings prioritize practical access and growth corridors, depending on the project.</div>
+                          </div>
+                        </div>
+                        <div className="w-[280px] shrink-0 snap-start">
+                          <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+                            <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(34,197,94,0.10)] text-emerald-700 ring-1 ring-emerald-100">
+                              <IconStar className="text-emerald-700" />
+                            </div>
+                            <div className="mt-4 text-sm font-semibold text-zinc-900">High growth potential</div>
+                            <div className="mt-2 text-sm leading-7 text-zinc-600">Curated opportunities positioned for long-term value based on location dynamics.</div>
+                          </div>
                         </div>
                       </div>
-                      <div className="w-[280px]">
-                        <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-                          <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(29,43,86,0.10)]" style={{ color: NAVY }}>
-                            <IconShield accent={NAVY} />
-                          </div>
-                          <div className="mt-4 text-sm font-semibold text-zinc-900">Secure investment option</div>
-                          <div className="mt-2 text-sm leading-7 text-zinc-600">A process designed for confidence: verification, support, and clear next steps.</div>
-                        </div>
-                      </div>
-                      <div className="w-[280px]">
-                        <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-                          <div className="grid size-12 place-items-center rounded-2xl bg-zinc-50 ring-1 ring-zinc-100" style={{ color: ACCENT }}>
-                            <IconSpark accent={ACCENT} />
-                          </div>
-                          <div className="mt-4 text-sm font-semibold text-zinc-900">Flexible payment plan</div>
-                          <div className="mt-2 text-sm leading-7 text-zinc-600">Installment options vary by listing. Request info to see available plans and terms.</div>
-                        </div>
-                      </div>
-                      <div className="w-[280px]">
-                        <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-                          <div className="grid size-12 place-items-center rounded-2xl bg-zinc-50 ring-1 ring-zinc-100 text-zinc-800">
-                            <IconArrowUpRight />
-                          </div>
-                          <div className="mt-4 text-sm font-semibold text-zinc-900">Instant allocation (terms apply)</div>
-                          <div className="mt-2 text-sm leading-7 text-zinc-600">Where available, allocation is delivered based on the project’s stated requirements.</div>
-                        </div>
-                      </div>
-                      <div className="w-[280px]">
-                        <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-                          <div className="grid size-12 place-items-center rounded-2xl bg-zinc-50 ring-1 ring-zinc-100 text-zinc-800">
-                            <IconPin className="text-zinc-800" />
-                          </div>
-                          <div className="mt-4 text-sm font-semibold text-zinc-900">Accessible locations</div>
-                          <div className="mt-2 text-sm leading-7 text-zinc-600">Listings prioritize practical access and growth corridors, depending on the project.</div>
-                        </div>
-                      </div>
-                      <div className="w-[280px]">
-                        <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-                          <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(34,197,94,0.10)] text-emerald-700 ring-1 ring-emerald-100">
-                            <IconStar className="text-emerald-700" />
-                          </div>
-                          <div className="mt-4 text-sm font-semibold text-zinc-900">High growth potential</div>
-                          <div className="mt-2 text-sm leading-7 text-zinc-600">Curated opportunities positioned for long-term value based on location dynamics.</div>
-                        </div>
-                      </div>
-                    </AutoMarquee>
+                    </div>
                   </div>
 
                   <div className="hidden sm:block">
@@ -439,13 +449,15 @@ export default function HomeClient(props: {
               </div>
 
               <div className="mt-10 sm:hidden">
-                <AutoMarquee className="-mx-5 px-5 py-1" speed={0.65}>
-                  {props.latestCards.map((c) => (
-                    <div key={c.id} className="w-[300px]">
-                      <PropertyCard title={c.title} location={c.location} price={c.price} showBrand imageUrl={c.imageUrl} accent={ACCENT} href={c.href} />
-                    </div>
-                  ))}
-                </AutoMarquee>
+                <div className="-mx-5 overflow-x-auto px-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex w-max snap-x snap-mandatory items-stretch gap-4 pr-4">
+                    {props.latestCards.map((c) => (
+                      <div key={c.id} className="w-[300px] shrink-0 snap-start">
+                        <PropertyCard title={c.title} location={c.location} price={c.price} showBrand imageUrl={c.imageUrl} accent={ACCENT} href={c.href} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="hidden sm:block">
