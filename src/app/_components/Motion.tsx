@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Children, useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
-function usePrefersReducedMotion() {
+export function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
@@ -130,3 +131,179 @@ export function Parallax({
   );
 }
 
+export function Float({
+  children,
+  className,
+  amplitude = 8,
+  duration = 5,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  amplitude?: number;
+  duration?: number;
+  delay?: number;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
+  if (reducedMotion) return <div className={className}>{children}</div>;
+
+  return (
+    <motion.div
+      className={className}
+      initial={{ y: 0 }}
+      animate={{ y: [0, -amplitude, 0] }}
+      transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function Stagger({
+  children,
+  className,
+  delayChildren = 0.08,
+  staggerChildren = 0.08,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delayChildren?: number;
+  staggerChildren?: number;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
+  if (reducedMotion) return <div className={className}>{children}</div>;
+
+  const container = {
+    hidden: {},
+    show: { transition: { delayChildren, staggerChildren } },
+  };
+  const item = {
+    hidden: { opacity: 0, y: 14, filter: "blur(6px)" },
+    show: { opacity: 1, y: 0, filter: "blur(0px)" },
+  };
+
+  return (
+    <motion.div
+      className={className}
+      variants={container}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.18, margin: "0px 0px -10% 0px" }}
+    >
+      {Children.toArray(children).map((child, idx) => (
+        <motion.div
+          key={(child as any)?.key ?? idx}
+          className="contents"
+          variants={item}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+        >
+          {child}
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
+export function InView({
+  children,
+  className,
+  from = "up",
+  delayMs = 0,
+  blur = true,
+  scale = false,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  from?: "up" | "down" | "left" | "right";
+  delayMs?: number;
+  blur?: boolean;
+  scale?: boolean;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
+  if (reducedMotion) return <div className={className}>{children}</div>;
+
+  const dist = 18;
+  const x = from === "left" ? -dist : from === "right" ? dist : 0;
+  const y = from === "up" ? dist : from === "down" ? -dist : 0;
+
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, x, y, filter: blur ? "blur(8px)" : "none", scale: scale ? 0.98 : 1 }}
+      whileInView={{ opacity: 1, x: 0, y: 0, filter: "blur(0px)", scale: 1 }}
+      transition={{ duration: 0.55, ease: "easeOut", delay: delayMs / 1000 }}
+      viewport={{ once: true, amount: 0.2, margin: "0px 0px -10% 0px" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function ImageReveal({
+  children,
+  className,
+  delayMs = 0,
+  direction = "left",
+  zoom = true,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delayMs?: number;
+  direction?: "left" | "right";
+  zoom?: boolean;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
+  if (reducedMotion) return <div className={className}>{children}</div>;
+
+  const origin = direction === "left" ? "left" : "right";
+
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 6 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut", delay: delayMs / 1000 }}
+      viewport={{ once: true, amount: 0.22, margin: "0px 0px -10% 0px" }}
+    >
+      <motion.div
+        initial={{ scale: zoom ? 1.07 : 1 }}
+        whileInView={{ scale: 1 }}
+        transition={{ duration: 0.9, ease: "easeOut", delay: delayMs / 1000 }}
+        viewport={{ once: true, amount: 0.22, margin: "0px 0px -10% 0px" }}
+        className="relative h-full w-full"
+      >
+        {children}
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-zinc-200"
+          initial={{ scaleX: 1 }}
+          whileInView={{ scaleX: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: delayMs / 1000 }}
+          viewport={{ once: true, amount: 0.22, margin: "0px 0px -10% 0px" }}
+          style={{ transformOrigin: origin }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export function HoverLift({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
+  if (reducedMotion) return <div className={className}>{children}</div>;
+
+  return (
+    <motion.div
+      className={className}
+      whileHover={{ y: -6, scale: 1.01, rotate: -0.15 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}

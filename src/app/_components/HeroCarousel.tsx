@@ -77,6 +77,18 @@ export default function HeroCarousel({ accent }: { accent: string }) {
   return (
     <div className="relative overflow-hidden rounded-[28px] bg-[#131b2d]">
       <div className="absolute inset-0 bg-[radial-gradient(900px_560px_at_18%_30%,rgba(34,197,94,0.22),transparent),radial-gradient(900px_560px_at_85%_20%,rgba(59,130,246,0.18),transparent),linear-gradient(115deg,rgba(0,0,0,0.70),rgba(0,0,0,0.30),rgba(0,0,0,0.08))]" />
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-20 -top-24 size-80 rounded-full bg-[rgba(242,85,93,0.18)] blur-3xl"
+        animate={{ x: [0, 22, 0], y: [0, 14, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-28 -right-24 size-96 rounded-full bg-[rgba(59,130,246,0.16)] blur-3xl"
+        animate={{ x: [0, -18, 0], y: [0, -12, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
 
       <div className="relative grid min-h-[420px] gap-10 px-8 py-10 sm:min-h-[460px] sm:px-12 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <AnimatePresence mode="wait">
