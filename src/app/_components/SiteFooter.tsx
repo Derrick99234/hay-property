@@ -1,6 +1,6 @@
 import Link from "next/link";
 import NewsletterForm from "./NewsletterForm";
-import { IconInstagram, IconLinkedIn, IconMail, IconPhone, IconPin, IconX } from "./icons";
+import { IconInstagram, IconMail, IconPhone, IconPin, IconTikTok, IconX, IconYouTube } from "./icons";
 
 export default function SiteFooter({ accent, navy }: { accent: string; navy: string }) {
   return (
@@ -35,7 +35,7 @@ export default function SiteFooter({ accent, navy }: { accent: string; navy: str
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconPhone />
                 </span>
-                <span>+234 800 000 0000</span>
+                <span>+234 906 661 7600</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
@@ -47,21 +47,24 @@ export default function SiteFooter({ accent, navy }: { accent: string; navy: str
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconPin className="text-white" />
                 </span>
-                <span>Lagos, Nigeria</span>
+                <span>Ajayi Apata, Opp. Mobile Road, Sangotedo Road, Lagos</span>
               </div>
             </div>
           </FooterCol>
 
           <FooterCol title="Follow">
             <div className="flex items-center gap-3">
-              <SocialIcon href="https://x.com" ariaLabel="X">
+              <SocialIcon href="https://x.com/haayyproperties" ariaLabel="X">
                 <IconX />
               </SocialIcon>
-              <SocialIcon href="https://instagram.com" ariaLabel="Instagram">
+              <SocialIcon href="https://instagram.com/hayproperties" ariaLabel="Instagram">
                 <IconInstagram />
               </SocialIcon>
-              <SocialIcon href="https://linkedin.com" ariaLabel="LinkedIn">
-                <IconLinkedIn />
+              <SocialIcon href="https://www.tiktok.com/@hay.property.dl" ariaLabel="TikTok">
+                <IconTikTok />
+              </SocialIcon>
+              <SocialIcon href="https://www.youtube.com/@haypropertiesdl" ariaLabel="YouTube">
+                <IconYouTube />
               </SocialIcon>
             </div>
           </FooterCol>
@@ -144,4 +147,3 @@ function LogoMark({ inverted, accent }: { inverted?: boolean; accent: string }) 
     </div>
   );
 }
-

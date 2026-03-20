@@ -39,14 +39,13 @@ export default function ContactPage() {
                 CONTACT INFORMATION
               </h2>
               <p className="mt-5 max-w-xs text-sm leading-7 text-white/70">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Tellus
-                vel eu, amet pulvinar. Volutpat morbi id.
+                Reach our team directly for inspections, documentation requests, and project details.
               </p>
 
               <div className="mt-12 space-y-6">
-                <InfoRow icon={<IconPin />} text="Ubud No.88, USA, Renon, New York" />
-                <InfoRow icon={<IconPhone />} text="(+75)8123451234" />
-                <InfoRow icon={<IconMail />} text="Contact@domain.com" />
+                <InfoRow icon={<IconPin />} text="Ajayi Apata, Opp. Mobile Road, Sangotedo Road, Lagos" />
+                <InfoRow icon={<IconPhone />} text="+234 906 661 7600" />
+                <InfoRow icon={<IconMail />} text="haayyproperties@gmail.com" />
               </div>
             </div>
 

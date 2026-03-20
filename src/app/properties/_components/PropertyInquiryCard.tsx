@@ -223,13 +223,13 @@ export default function PropertyInquiryCard({
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <a
-            href="https://wa.me/2348000000000"
+            href="https://wa.me/2349066617600"
             className="inline-flex h-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-900 shadow-sm transition hover:border-zinc-300"
           >
             WhatsApp
           </a>
           <a
-            href="tel:+2348000000000"
+            href="tel:+2349066617600"
             className="inline-flex h-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-900 shadow-sm transition hover:border-zinc-300"
           >
             Call us
