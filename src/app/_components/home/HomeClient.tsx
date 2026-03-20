@@ -478,7 +478,7 @@ export default function HomeClient(props: {
             </section>
           </Reveal>
 
-          <Reveal delayMs={120}>
+          {/* <Reveal delayMs={120}>
             <section className="mt-16">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div className="space-y-2">
@@ -512,7 +512,7 @@ export default function HomeClient(props: {
                 ))}
               </Stagger>
             </section>
-          </Reveal>
+          </Reveal> */}
 
           <Reveal delayMs={160}>
             <section className="relative mt-16 overflow-hidden rounded-[28px] bg-[#f6f0dd] shadow-sm">
