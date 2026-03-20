@@ -71,7 +71,7 @@ export default function AutoMarquee({
     >
       <div ref={innerRef} className="flex w-max items-stretch gap-4 pr-4">
         {doubled.map((child, idx) => (
-          <div key={(child as any)?.key ?? idx} className="shrink-0">
+          <div key={idx} className="shrink-0">
             {child}
           </div>
         ))}

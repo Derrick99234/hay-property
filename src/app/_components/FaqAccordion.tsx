@@ -26,10 +26,10 @@ export default function FaqAccordion({ items, accent }: { items: FaqItem[]; acce
 
   const container = {
     hidden: {},
-    show: { transition: { delayChildren: 0.05, staggerChildren: 0.08 } },
+    show: { transition: { delayChildren: 0.15, staggerChildren: 0.20 } },
   };
   const item = {
-    hidden: { opacity: 0, y: 14, filter: "blur(6px)" },
+    hidden: { opacity: 0, y: 20, filter: "blur(10px)" },
     show: { opacity: 1, y: 0, filter: "blur(0px)" },
   };
 
