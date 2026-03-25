@@ -11,7 +11,12 @@ export default function ContactPage() {
       <div className="mx-auto w-full max-w-7xl px-5 pb-20 pt-8 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center">
-            <Image src="/logo/logo1.png" alt="HAY Property" width={140} height={72} />
+            <Image
+              src="/logo/logo1.png"
+              alt="HAY Property"
+              width={140}
+              height={72}
+            />
           </Link>
           <Link
             href="/"
@@ -26,24 +31,27 @@ export default function ContactPage() {
           <h1 className="text-2xl font-semibold tracking-[0.18em] text-zinc-900">
             CONTACT
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-500">
-            Mauris primis turpis Laoreet magna felis mi amet quam enim curae.
-            Sodales semper tempor dictum faucibus habitasse.
-          </p>
         </div>
 
         <section className="mx-auto mt-12 w-full max-w-5xl overflow-hidden border border-zinc-300 bg-white">
           <div className="grid md:grid-cols-[380px_1fr]">
-            <div className="relative px-10 py-12 text-white" style={{ backgroundColor: NAVY }}>
+            <div
+              className="relative px-10 py-12 text-white"
+              style={{ backgroundColor: NAVY }}
+            >
               <h2 className="text-sm font-semibold tracking-[0.18em]">
                 CONTACT INFORMATION
               </h2>
               <p className="mt-5 max-w-xs text-sm leading-7 text-white/70">
-                Reach our team directly for inspections, documentation requests, and project details.
+                Reach our team directly for inspections, documentation requests,
+                and project details.
               </p>
 
               <div className="mt-12 space-y-6">
-                <InfoRow icon={<IconPin />} text="Ajayi Apata, Opp. Mobile Road, Sangotedo Road, Lagos" />
+                <InfoRow
+                  icon={<IconPin />}
+                  text="Ajayi Apata, Opp. Mobile Road, Sangotedo Road, Lagos"
+                />
                 <InfoRow icon={<IconPhone />} text="+234 906 661 7600" />
                 <InfoRow icon={<IconMail />} text="haayyproperties@gmail.com" />
               </div>
@@ -94,9 +102,7 @@ function Field({ label, multiline }: { label: string; multiline?: boolean }) {
           className="mt-3 w-full resize-none border-b border-zinc-300 bg-transparent text-sm text-zinc-900 outline-none focus:border-zinc-400"
         />
       ) : (
-        <input
-          className="mt-3 w-full border-b border-zinc-300 bg-transparent pb-1 text-sm text-zinc-900 outline-none focus:border-zinc-400"
-        />
+        <input className="mt-3 w-full border-b border-zinc-300 bg-transparent pb-1 text-sm text-zinc-900 outline-none focus:border-zinc-400" />
       )}
     </label>
   );

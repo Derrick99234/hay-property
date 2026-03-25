@@ -5,12 +5,28 @@ import SiteFooter from "../SiteFooter";
 import SiteHeader from "../SiteHeader";
 import CategoryPill from "./CategoryPill";
 import { PropertyCard, WidePropertyCard } from "./PropertyCards";
-import { Float, HoverLift, ImageReveal, InView, Parallax, Reveal, Stagger } from "../Motion";
-import { IconArrowUpRight, IconPin, IconShield, IconSpark, IconStar } from "../icons";
+import {
+  Float,
+  HoverLift,
+  ImageReveal,
+  InView,
+  Parallax,
+  Reveal,
+  Stagger,
+} from "../Motion";
+import {
+  IconArrowUpRight,
+  IconPin,
+  IconShield,
+  IconSpark,
+  IconStar,
+} from "../icons";
 import Image from "next/image";
 import FaqAccordion, { type FaqItem } from "../FaqAccordion";
 import Link from "next/link";
-import FlyerPortfolioSection, { type FlyerPortfolioItem } from "./FlyerPortfolioSection";
+import FlyerPortfolioSection, {
+  type FlyerPortfolioItem,
+} from "./FlyerPortfolioSection";
 
 export type HomePropertyCard = {
   id: string;
@@ -34,7 +50,8 @@ export type HomeBlogCard = {
 const FLYERS: FlyerPortfolioItem[] = [
   {
     id: "harvest-grove-acre-hectares",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/Acre%20and%20Hectares.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/Acre%20and%20Hectares.jpeg",
     badge: "Acre & hectares",
     name: "Harvest Grove",
     title: "Farm 33 initiative",
@@ -46,7 +63,8 @@ const FLYERS: FlyerPortfolioItem[] = [
   },
   {
     id: "greenfield-discount",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/GREENFIELD%20DISCOUNT%20SALES.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/GREENFIELD%20DISCOUNT%20SALES.jpeg",
     badge: "Discount sales",
     name: "Greenfield",
     location: "Omu-Epe, Lagos",
@@ -59,7 +77,8 @@ const FLYERS: FlyerPortfolioItem[] = [
   },
   {
     id: "greenfield",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/GREENFIELD.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/GREENFIELD.jpeg",
     badge: "New listing",
     name: "Greenfield",
     location: "Omu-Epe, Lagos",
@@ -72,7 +91,8 @@ const FLYERS: FlyerPortfolioItem[] = [
   },
   {
     id: "hg-intro",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/HG.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/HG.jpeg",
     badge: "Introducing",
     name: "Harvest Grove",
     highlights: ["Developed by HAY Property Ltd.", "An initiative by Farm 33"],
@@ -80,7 +100,8 @@ const FLYERS: FlyerPortfolioItem[] = [
   },
   {
     id: "ireti-phase-2",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/IRETI%20NEW%20PRICE.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/IRETI%20NEW%20PRICE.jpeg",
     badge: "New price",
     name: "Ireti Residence (Phase 2)",
     location: "Imota, Ikorodu",
@@ -93,7 +114,8 @@ const FLYERS: FlyerPortfolioItem[] = [
   },
   {
     id: "northern-park",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/NORTHERN%20PARK.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/NORTHERN%20PARK.jpeg",
     badge: "Phase II",
     name: "Northernpark (Phase II)",
     location: "Araga, Epe",
@@ -106,20 +128,27 @@ const FLYERS: FlyerPortfolioItem[] = [
   },
   {
     id: "pride-rock",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/PRICE%20ROCK.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/PRICE%20ROCK.jpeg",
     badge: "Ibadan",
     name: "Pride Rock",
     location: "Moniya–Iseyin Expressway, Ibadan",
     title: "Freehold (C of O in view)",
     primaryPrice: "₦897K (300sqm)",
     deposit: "₦300K",
-    priceLines: ["300sqm: ₦897K", "500sqm: ₦1.040M", "1 acre: ₦5.096M", "2 acres: ₦7.914M"],
+    priceLines: [
+      "300sqm: ₦897K",
+      "500sqm: ₦1.040M",
+      "1 acre: ₦5.096M",
+      "2 acres: ₦7.914M",
+    ],
     highlights: ["Flexible payment plan", "Instant allocation (terms apply)"],
     propertyHref: "/properties/pride-rock-estate",
   },
   {
     id: "harvest-grove-plots",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/Plots.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/Plots.jpeg",
     badge: "Co-own an acre",
     name: "Harvest Grove",
     primaryPrice: "₦750K (1 plot)",
@@ -130,7 +159,8 @@ const FLYERS: FlyerPortfolioItem[] = [
   },
   {
     id: "northern-park-discount",
-    imageUrl: "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/SALES%20DISCOUNT%20NORTHERN%20PARK.jpeg",
+    imageUrl:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/flyers/SALES%20DISCOUNT%20NORTHERN%20PARK.jpeg",
     badge: "Discount sales",
     name: "Northernpark (Phase II)",
     location: "Araga, Epe",
@@ -173,9 +203,13 @@ export default function HomeClient(props: {
               >
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <div className="text-xs font-semibold text-zinc-500">Trust score</div>
+                    <div className="text-xs font-semibold text-zinc-500">
+                      Trust score
+                    </div>
                     <div className="flex items-center gap-2">
-                      <div className="text-2xl font-semibold leading-none">4.95</div>
+                      <div className="text-2xl font-semibold leading-none">
+                        4.95
+                      </div>
                       <div className="flex items-center gap-0.5">
                         <IconStar style={{ color: ACCENT }} />
                         <IconStar style={{ color: ACCENT }} />
@@ -192,7 +226,7 @@ export default function HomeClient(props: {
               </Float>
             </section>
           </Reveal>
-
+          {/* 
           <Reveal delayMs={60}>
             <section id="about" className="mt-14 overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-zinc-100">
               <div className="grid gap-10 p-8 sm:p-12 lg:grid-cols-[1fr_520px] lg:items-center">
@@ -261,9 +295,9 @@ export default function HomeClient(props: {
                 </div>
               </div>
             </section>
-          </Reveal>
+          </Reveal> */}
 
-          <Reveal delayMs={80}>
+          {/* <Reveal delayMs={80}>
             <section className="mt-16 overflow-hidden rounded-[28px] bg-zinc-50 shadow-sm ring-1 ring-zinc-100">
               <div className="relative">
                 <div className="absolute inset-0 bg-[radial-gradient(900px_560px_at_15%_20%,rgba(242,85,93,0.10),transparent),radial-gradient(900px_560px_at_85%_35%,rgba(29,43,86,0.10),transparent),linear-gradient(180deg,rgba(255,255,255,0.65),rgba(255,255,255,0.85))]" />
@@ -402,21 +436,30 @@ export default function HomeClient(props: {
                 </div>
               </div>
             </section>
-          </Reveal>
+          </Reveal> */}
 
           <Reveal delayMs={95}>
             <FlyerPortfolioSection accent={ACCENT} items={FLYERS} />
           </Reveal>
 
-          <Reveal delayMs={110}>
+          {/* <Reveal delayMs={110}>
             <section id="latest" className="mt-20">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Latest property</p>
-                  <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Latest listings</h2>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Latest property
+                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+                    Latest listings
+                  </h2>
                 </div>
                 <div className="flex items-center gap-3 rounded-full border border-zinc-200 bg-white px-4 py-2 shadow-sm">
-                  <div className="text-sm font-semibold" style={{ color: ACCENT }}>4.95</div>
+                  <div
+                    className="text-sm font-semibold"
+                    style={{ color: ACCENT }}
+                  >
+                    4.95
+                  </div>
                   <div className="flex items-center gap-0.5">
                     <IconStar style={{ color: ACCENT }} />
                     <IconStar style={{ color: ACCENT }} />
@@ -424,13 +467,18 @@ export default function HomeClient(props: {
                     <IconStar style={{ color: ACCENT }} />
                     <IconStar style={{ color: ACCENT }} />
                   </div>
-                  <div className="text-xs font-semibold text-zinc-500">100%</div>
+                  <div className="text-xs font-semibold text-zinc-500">
+                    100%
+                  </div>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-8 md:grid-cols-2">
                 <p className="max-w-xl text-sm leading-7 text-zinc-600 sm:text-base">
-                  Real estate investments shouldn’t feel complicated. Explore vetted land opportunities with clear pricing, verified locations, and the documentation you need to buy with confidence.
+                  Real estate investments shouldn’t feel complicated. Explore
+                  vetted land opportunities with clear pricing, verified
+                  locations, and the documentation you need to buy with
+                  confidence.
                 </p>
                 <div className="rounded-2xl bg-white p-5 shadow-sm">
                   <div className="flex items-center justify-between">
@@ -439,11 +487,17 @@ export default function HomeClient(props: {
                         <IconSpark accent={ACCENT} />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold">Verified documents</div>
-                        <div className="text-xs text-zinc-500">Purchase-ready listings</div>
+                        <div className="text-sm font-semibold">
+                          Verified documents
+                        </div>
+                        <div className="text-xs text-zinc-500">
+                          Purchase-ready listings
+                        </div>
                       </div>
                     </div>
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">New</span>
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      New
+                    </span>
                   </div>
                 </div>
               </div>
@@ -453,7 +507,15 @@ export default function HomeClient(props: {
                   <div className="flex w-max snap-x snap-mandatory items-stretch gap-4 pr-4">
                     {props.latestCards.map((c) => (
                       <div key={c.id} className="w-[300px] shrink-0 snap-start">
-                        <PropertyCard title={c.title} location={c.location} price={c.price} showBrand imageUrl={c.imageUrl} accent={ACCENT} href={c.href} />
+                        <PropertyCard
+                          title={c.title}
+                          location={c.location}
+                          price={c.price}
+                          showBrand
+                          imageUrl={c.imageUrl}
+                          accent={ACCENT}
+                          href={c.href}
+                        />
                       </div>
                     ))}
                   </div>
@@ -464,7 +526,15 @@ export default function HomeClient(props: {
                 <Stagger className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {props.latestCards.slice(0, 3).map((c) => (
                     <HoverLift key={c.id} className="relative">
-                      <PropertyCard title={c.title} location={c.location} price={c.price} showBrand imageUrl={c.imageUrl} accent={ACCENT} href={c.href} />
+                      <PropertyCard
+                        title={c.title}
+                        location={c.location}
+                        price={c.price}
+                        showBrand
+                        imageUrl={c.imageUrl}
+                        accent={ACCENT}
+                        href={c.href}
+                      />
                     </HoverLift>
                   ))}
                 </Stagger>
@@ -472,11 +542,12 @@ export default function HomeClient(props: {
 
               {props.dbError ? (
                 <div className="mt-6 text-xs text-zinc-500">
-                  Live listings are temporarily unavailable. Showing featured examples.
+                  Live listings are temporarily unavailable. Showing featured
+                  examples.
                 </div>
               ) : null}
             </section>
-          </Reveal>
+          </Reveal> */}
 
           {/* <Reveal delayMs={120}>
             <section className="mt-16">
@@ -514,12 +585,14 @@ export default function HomeClient(props: {
             </section>
           </Reveal> */}
 
-          <Reveal delayMs={160}>
+          {/* <Reveal delayMs={160}>
             <section className="relative mt-16 overflow-hidden rounded-[28px] bg-[#f6f0dd] shadow-sm">
               <div className="grid gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
                 <div className="space-y-5">
                   <InView from="up">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Ready to own land</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      Ready to own land
+                    </p>
                   </InView>
                   <InView from="up" delayMs={70}>
                     <h2 className="text-3xl font-semibold leading-tight tracking-tight text-zinc-900 sm:text-4xl">
@@ -530,14 +603,19 @@ export default function HomeClient(props: {
                   </InView>
                   <InView from="up" delayMs={120}>
                     <p className="max-w-md text-sm leading-7 text-zinc-600 sm:text-base">
-                      Start your journey with curated plots, transparent pricing, and a support team that stays with you from inquiry to allocation.
+                      Start your journey with curated plots, transparent
+                      pricing, and a support team that stays with you from
+                      inquiry to allocation.
                     </p>
                   </InView>
                   <div className="flex flex-wrap items-center gap-4">
                     <Link
                       href="/properties"
                       className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-                      style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+                      style={{
+                        backgroundColor: ACCENT,
+                        boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+                      }}
                     >
                       Get started
                     </Link>
@@ -560,20 +638,33 @@ export default function HomeClient(props: {
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/10 via-transparent to-transparent" />
                     <Parallax className="absolute inset-0" strength={18}>
-                      <Image src={"https://pub-edd6261085894e2db893376ace3b663e.r2.dev/pages-image/ready%20to%20own%20land.jpg"} alt="Land" width={1400} height={933} className="h-full w-full object-cover" loading="lazy" />
+                      <Image
+                        src={
+                          "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/pages-image/ready%20to%20own%20land.jpg"
+                        }
+                        alt="Land"
+                        width={1400}
+                        height={933}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
                     </Parallax>
                   </ImageReveal>
                 </div>
               </div>
             </section>
-          </Reveal>
+          </Reveal> */}
 
           <Reveal delayMs={220}>
             <section className="mt-16">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Insights</p>
-                  <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Latest from the blog</h2>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Insights
+                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+                    Latest from the blog
+                  </h2>
                 </div>
                 <Link
                   href="/blog"
@@ -609,9 +700,16 @@ export default function HomeClient(props: {
                         ) : null}
                       </div>
                       <div className="space-y-2 p-5">
-                        <div className="text-base font-semibold tracking-tight text-zinc-900">{b.title}</div>
-                        <div className="text-sm leading-7 text-zinc-600 line-clamp-3">{b.excerpt}</div>
-                        <div className="pt-1 text-sm font-semibold" style={{ color: ACCENT }}>
+                        <div className="text-base font-semibold tracking-tight text-zinc-900">
+                          {b.title}
+                        </div>
+                        <div className="text-sm leading-7 text-zinc-600 line-clamp-3">
+                          {b.excerpt}
+                        </div>
+                        <div
+                          className="pt-1 text-sm font-semibold"
+                          style={{ color: ACCENT }}
+                        >
                           Read more →
                         </div>
                       </div>
@@ -621,39 +719,49 @@ export default function HomeClient(props: {
 
                 {props.blogCards.length === 0 ? (
                   <div className="md:col-span-3 rounded-2xl border border-zinc-200 bg-white p-6 text-sm text-zinc-700">
-                    No blog posts yet. Publish your first post in the admin to show it here.
+                    No blog posts yet. Publish your first post in the admin to
+                    show it here.
                   </div>
                 ) : null}
               </Stagger>
             </section>
           </Reveal>
 
-          <Reveal delayMs={260}>
+          {/* <Reveal delayMs={260}>
             <section className="mt-16 overflow-hidden rounded-[28px] bg-zinc-50 shadow-sm ring-1 ring-zinc-100">
               <div className="grid gap-10 p-8 sm:p-12 lg:grid-cols-[1fr_420px] lg:items-start">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">FAQs</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      FAQs
+                    </p>
                     <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
                       Answers to common questions
                     </h2>
                     <p className="max-w-2xl text-sm leading-7 text-zinc-600 sm:text-base">
-                      Get clarity on inspections, documentation, payment plans, and allocation.
+                      Get clarity on inspections, documentation, payment plans,
+                      and allocation.
                     </p>
                   </div>
                   <FaqAccordion items={props.faqItems} accent={ACCENT} />
                 </div>
 
                 <div className="space-y-4 rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-                  <div className="text-sm font-semibold text-zinc-900">Still have questions?</div>
+                  <div className="text-sm font-semibold text-zinc-900">
+                    Still have questions?
+                  </div>
                   <div className="text-sm leading-7 text-zinc-600">
-                    Visit the full FAQs page or open any property to book an inspection or request more information.
+                    Visit the full FAQs page or open any property to book an
+                    inspection or request more information.
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
                     <Link
                       href="/faqs"
                       className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-                      style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+                      style={{
+                        backgroundColor: ACCENT,
+                        boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+                      }}
                     >
                       View FAQs
                     </Link>
@@ -667,7 +775,7 @@ export default function HomeClient(props: {
                 </div>
               </div>
             </section>
-          </Reveal>
+          </Reveal> */}
         </main>
       </div>
       <SiteFooter accent={ACCENT} navy={NAVY} />
