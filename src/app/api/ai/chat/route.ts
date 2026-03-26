@@ -40,7 +40,6 @@ function sanitizeReply(text: string) {
   out = out.replace(/^\s*(hello|hi|hey)\s+[A-Z][a-zA-Z'-]{1,20}\s*[!.,]\s+/i, "");
   out = out.replace(/^\s*(hello|hi|hey)\s*[!.,]\s+/i, "");
   out = out.replace(/\*\*(.+?)\*\*/g, "$1");
-  out = out.replace(/^\s*[\*\-\u2022]\s+/gm, "");
   return out;
 }
 
@@ -92,7 +91,7 @@ export async function POST(req: NextRequest) {
       "You are a friendly customer support assistant for HAY Property.",
       "You may use the CONVERSATION HISTORY for user-provided details (e.g., a property name the user mentioned, their preferences, or their name).",
       "If you do not have official company sources, do not make factual claims about HAY Property; ask a short clarifying question and suggest browsing the website.",
-      "Write in plain text. Avoid markdown, bullets, and numbered lists.",
+      "Prefer plain text. You may use short bullet points or numbered lists when they make the answer clearer.",
       "Do not start every response with a greeting. Only greet if the user greets first.",
       "Do not keep repeating the user's name unless it is necessary.",
       "Keep responses concise, helpful, and professional.",
@@ -193,7 +192,7 @@ export async function POST(req: NextRequest) {
       "Use SOURCES for factual information about HAY Property (company info, listings, policies).",
       "If SOURCES do not contain enough company information, do not guess; ask one short clarifying question.",
       "If the user asks something unrelated to HAY Property and it is not answerable from CONVERSATION HISTORY, politely redirect to HAY Property topics.",
-      "Write in plain text. Avoid markdown, bullets, and numbered lists.",
+      "Prefer plain text. You may use short bullet points or numbered lists when they make the answer clearer.",
       "Do not start every response with a greeting. Only greet if the user greets first.",
       "Do not keep repeating the user's name unless it is necessary.",
       "Keep responses concise, helpful, and professional.",

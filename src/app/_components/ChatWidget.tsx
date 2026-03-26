@@ -275,12 +275,44 @@ export default function ChatWidget() {
 
 function MessageText({ text }: { text: string }) {
   const lines = text.split(/\r?\n/);
+  const blocks = groupMessageLines(lines);
+
   return (
     <>
-      {lines.map((line, lineIndex) => (
+      {blocks.map((block, blockIndex) => (
+        <MessageBlock key={`${block.type}-${blockIndex}`} block={block} />
+      ))}
+    </>
+  );
+}
+
+function MessageBlock({ block }: { block: MessageBlockData }) {
+  if (block.type === "ul") {
+    return (
+      <ul className="list-disc space-y-1 pl-5">
+        {block.items.map((item, index) => (
+          <li key={`${item}-${index}`}>{renderLinkedLine(item)}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (block.type === "ol") {
+    return (
+      <ol className="list-decimal space-y-1 pl-5">
+        {block.items.map((item, index) => (
+          <li key={`${item}-${index}`}>{renderLinkedLine(item)}</li>
+        ))}
+      </ol>
+    );
+  }
+
+  return (
+    <>
+      {block.lines.map((line, lineIndex) => (
         <span key={`${line}-${lineIndex}`}>
           {renderLinkedLine(line)}
-          {lineIndex < lines.length - 1 ? <br /> : null}
+          {lineIndex < block.lines.length - 1 ? <br /> : null}
         </span>
       ))}
     </>
@@ -319,6 +351,60 @@ function tokenizeLinks(input: string): LinkToken[] {
   ];
 
   return patterns.reduce((currentTokens, pattern) => splitTokensByPattern(currentTokens, pattern.regex, pattern.href), tokens);
+}
+
+type MessageBlockData =
+  | { type: "text"; lines: string[] }
+  | { type: "ul"; items: string[] }
+  | { type: "ol"; items: string[] };
+
+function groupMessageLines(lines: string[]): MessageBlockData[] {
+  const blocks: MessageBlockData[] = [];
+  let textLines: string[] = [];
+  let listType: "ul" | "ol" | null = null;
+  let listItems: string[] = [];
+
+  const flushText = () => {
+    if (!textLines.length) return;
+    blocks.push({ type: "text", lines: textLines });
+    textLines = [];
+  };
+
+  const flushList = () => {
+    if (!listType || !listItems.length) return;
+    blocks.push({ type: listType, items: listItems });
+    listType = null;
+    listItems = [];
+  };
+
+  for (const line of lines) {
+    const bulletMatch = /^\s*[-*•]\s+(.+)$/.exec(line);
+    const numberMatch = /^\s*\d+[.)]\s+(.+)$/.exec(line);
+
+    if (bulletMatch) {
+      flushText();
+      if (listType && listType !== "ul") flushList();
+      listType = "ul";
+      listItems.push(bulletMatch[1]);
+      continue;
+    }
+
+    if (numberMatch) {
+      flushText();
+      if (listType && listType !== "ol") flushList();
+      listType = "ol";
+      listItems.push(numberMatch[1]);
+      continue;
+    }
+
+    flushList();
+    textLines.push(line);
+  }
+
+  flushList();
+  flushText();
+
+  return blocks.length ? blocks : [{ type: "text", lines: [""] }];
 }
 
 function splitTokensByPattern(
