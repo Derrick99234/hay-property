@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { connectMongo } from "../../../lib/mongodb";
 import { Property } from "../../../models/Property";
 import { User } from "../../../models/User";
+import DOMPurify from "isomorphic-dompurify";
 import WishlistButton from "../../_components/WishlistButton";
 import SiteHeader from "../../_components/SiteHeader";
 import SiteFooter from "../../_components/SiteFooter";
@@ -34,6 +35,52 @@ function InfoItem({ label, value }: { label: string; value: string }) {
       <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-500">{label}</div>
       <div className="mt-1 text-sm font-semibold text-zinc-900">{value}</div>
     </div>
+  );
+}
+
+function normalizeDescriptionHtml(input: string) {
+  const trimmed = input.trim();
+  if (!trimmed) return "";
+  if (/<[a-z][\s\S]*>/i.test(trimmed)) return trimmed;
+
+  const paragraphs = trimmed
+    .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n")
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => `<p>${escapeHtml(part).replace(/\n/g, "<br />")}</p>`);
+
+  return paragraphs.join("");
+}
+
+function escapeHtml(input: string) {
+  return input
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function PropertyDescription({ text }: { text: string }) {
+  const normalized = normalizeDescriptionHtml(text);
+  const safeHtml = normalized
+    ? DOMPurify.sanitize(normalized, {
+        ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "ol", "ul", "li", "a", "h2", "h3", "blockquote"],
+        ALLOWED_ATTR: ["href", "target", "rel"],
+      })
+    : "";
+
+  if (!safeHtml) {
+    return <div className="text-sm leading-7 text-zinc-700">Contact us to request full details and documentation.</div>;
+  }
+
+  return (
+    <div
+      className="property-richtext max-w-none"
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
+    />
   );
 }
 
@@ -206,7 +253,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
               <div className="space-y-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">About property</div>
-                <div className="text-sm leading-7 text-zinc-700">{description || "Contact us to request full details and documentation."}</div>
+                <PropertyDescription text={description} />
               </div>
 
               <div className="space-y-3">

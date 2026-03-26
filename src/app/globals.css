@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-quill-new/dist/quill.snow.css";
 
 :root {
   --background: #ffffff;
@@ -17,4 +18,70 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.rich-text-editor .ql-toolbar.ql-snow {
+  border: 0;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.rich-text-editor .ql-container.ql-snow {
+  border: 0;
+  font-family: inherit;
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 16rem;
+  color: #18181b;
+  font-size: 0.875rem;
+  line-height: 1.75;
+}
+
+.rich-text-editor .ql-editor.ql-blank::before {
+  color: #a1a1aa;
+  font-style: normal;
+}
+
+.property-richtext {
+  color: #3f3f46;
+  font-size: 0.875rem;
+  line-height: 1.75;
+}
+
+.property-richtext > * + * {
+  margin-top: 1rem;
+}
+
+.property-richtext h2,
+.property-richtext h3 {
+  color: #18181b;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.property-richtext h2 {
+  font-size: 1.25rem;
+}
+
+.property-richtext h3 {
+  font-size: 1rem;
+}
+
+.property-richtext ul,
+.property-richtext ol {
+  padding-left: 1.25rem;
+}
+
+.property-richtext ul {
+  list-style: disc;
+}
+
+.property-richtext ol {
+  list-style: decimal;
+}
+
+.property-richtext a {
+  color: #f2555d;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }

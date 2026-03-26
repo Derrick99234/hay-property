@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       const price = typeof (p as any).price === "number" ? String((p as any).price) : "";
       const currency = String((p as any).currency ?? "NGN");
       const status = String((p as any).status ?? "");
-      const desc = String((p as any).description ?? "");
+      const desc = htmlToText(String((p as any).description ?? ""));
       const url = `${origin}/properties/${encodeURIComponent(slug)}`;
       const content = normalizeText(
         [

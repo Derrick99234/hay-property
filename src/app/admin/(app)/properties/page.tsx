@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../../_components/Modal";
 import Pagination from "../../_components/Pagination";
+import RichTextEditor from "../../_components/RichTextEditor";
 import { useAdminDB } from "../../_components/AdminProvider";
 import { AdminProperty, formatDateShort } from "../../_lib/adminStore";
 import Image from "next/image";
@@ -331,12 +332,16 @@ function PropertyForm({
       </Field>
 
       <Field label="Description">
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="min-h-28 w-full resize-y rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-zinc-300"
-          placeholder="Short description of the property"
-        />
+        <div className="space-y-2">
+          <RichTextEditor
+            value={description}
+            onChange={setDescription}
+            placeholder="Write a polished property overview with headings, lists, and links if needed."
+          />
+          <div className="text-xs leading-5 text-zinc-500">
+            This editor supports headings, bold text, bullet lists, numbered lists, and links. What you format here is how it will appear on the property page.
+          </div>
+        </div>
       </Field>
 
       <Field label="Key features (one per line)">
