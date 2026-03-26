@@ -55,7 +55,7 @@ export default function SiteFooter({
             </div>
           </div>
 
-          <FooterCol title="Category">
+          {/* <FooterCol title="Category">
             <FooterLink
               href={{ pathname: "/properties", query: { q: "land" } }}
             >
@@ -72,7 +72,7 @@ export default function SiteFooter({
               Housing
             </FooterLink>
             <FooterLink href="/blog">Blog</FooterLink>
-          </FooterCol>
+          </FooterCol> */}
 
           <FooterCol title="Contact">
             <div className="space-y-3 text-sm text-white/80">
@@ -80,7 +80,10 @@ export default function SiteFooter({
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconPhone />
                 </span>
-                <a href={CONTACT_PHONE_HREF} className="transition hover:text-white">
+                <a
+                  href={CONTACT_PHONE_HREF}
+                  className="transition hover:text-white"
+                >
                   {CONTACT_PHONE_DISPLAY}
                 </a>
               </div>
@@ -88,7 +91,10 @@ export default function SiteFooter({
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconMail />
                 </span>
-                <a href={`mailto:${CONTACT_EMAIL}`} className="transition hover:text-white">
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="transition hover:text-white"
+                >
                   {CONTACT_EMAIL}
                 </a>
               </div>
