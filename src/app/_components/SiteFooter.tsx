@@ -11,6 +11,13 @@ import {
 } from "./icons";
 import Image from "next/image";
 
+const CONTACT_PHONE_DISPLAY = "+234 906 661 7600";
+const CONTACT_PHONE_HREF = "tel:+2349066617600";
+const CONTACT_EMAIL = "haayyproperties@gmail.com";
+const CONTACT_ADDRESS = "Ajayi Apata, Opp. Mobile Road, Sangotedo Road, Lagos";
+const CONTACT_ADDRESS_HREF =
+  "https://www.google.com/maps/search/?api=1&query=Ajayi%20Apata%2C%20Opp.%20Mobile%20Road%2C%20Sangotedo%20Road%2C%20Lagos";
+
 export default function SiteFooter({
   accent,
   navy,
@@ -73,21 +80,30 @@ export default function SiteFooter({
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconPhone />
                 </span>
-                <span>+234 906 661 7600</span>
+                <a href={CONTACT_PHONE_HREF} className="transition hover:text-white">
+                  {CONTACT_PHONE_DISPLAY}
+                </a>
               </div>
               <div className="flex items-center gap-3">
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconMail />
                 </span>
-                <span>haayyproperties@gmail.com</span>
+                <a href={`mailto:${CONTACT_EMAIL}`} className="transition hover:text-white">
+                  {CONTACT_EMAIL}
+                </a>
               </div>
               <div className="flex items-center gap-3">
                 <span className="grid size-9 place-items-center rounded-full bg-white/10">
                   <IconPin className="text-white" />
                 </span>
-                <span>
-                  Ajayi Apata, Opp. Mobile Road, Sangotedo Road, Lagos
-                </span>
+                <a
+                  href={CONTACT_ADDRESS_HREF}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition hover:text-white"
+                >
+                  {CONTACT_ADDRESS}
+                </a>
               </div>
             </div>
           </FooterCol>

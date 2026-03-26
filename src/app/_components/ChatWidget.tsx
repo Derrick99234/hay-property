@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 
 type ChatMessage = {
   id: string;
@@ -10,6 +11,15 @@ type ChatMessage = {
 
 const ACCENT = "#f2555d";
 const SESSION_KEY = "hp_chat_sid_tmp";
+const KNOWN_ADDRESSES = [
+  "Ajayi Apata, Opp. Mobile Road, Sangotedo Road, Lagos",
+];
+
+type LinkToken = {
+  type: "text" | "link";
+  value: string;
+  href?: string;
+};
 
 function createId() {
   const g = globalThis as unknown as { crypto?: Crypto };
@@ -196,7 +206,7 @@ export default function ChatWidget() {
                       : "bg-white text-zinc-900 ring-zinc-100",
                   ].join(" ")}
                 >
-                  {m.text}
+                  <MessageText text={m.text} />
                 </div>
               </div>
             ))}
@@ -261,6 +271,110 @@ export default function ChatWidget() {
       )}
     </div>
   );
+}
+
+function MessageText({ text }: { text: string }) {
+  const lines = text.split(/\r?\n/);
+  return (
+    <>
+      {lines.map((line, lineIndex) => (
+        <span key={`${line}-${lineIndex}`}>
+          {renderLinkedLine(line)}
+          {lineIndex < lines.length - 1 ? <br /> : null}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function renderLinkedLine(line: string): ReactNode[] {
+  const tokens = tokenizeLinks(line);
+  return tokens.map((token, index) => {
+    if (token.type === "text" || !token.href) return <span key={`${index}-${token.value}`}>{token.value}</span>;
+    const isExternal = /^https?:\/\//i.test(token.href);
+    return (
+      <a
+        key={`${index}-${token.value}`}
+        href={token.href}
+        target={isExternal ? "_blank" : undefined}
+        rel={isExternal ? "noreferrer" : undefined}
+        className="underline decoration-current/40 underline-offset-4 transition hover:decoration-current"
+      >
+        {token.value}
+      </a>
+    );
+  });
+}
+
+function tokenizeLinks(input: string): LinkToken[] {
+  const tokens: LinkToken[] = [{ type: "text", value: input }];
+  const patterns = [
+    { regex: /\bhttps?:\/\/[^\s]+/gi, href: (value: string) => value },
+    { regex: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, href: (value: string) => `mailto:${value}` },
+    { regex: /\+?\d[\d\s()-]{7,}\d/g, href: (value: string) => `tel:${value.replace(/[^\d+]/g, "")}` },
+    ...KNOWN_ADDRESSES.map((address) => ({
+      regex: new RegExp(escapeRegExp(address), "gi"),
+      href: (value: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`,
+    })),
+  ];
+
+  return patterns.reduce((currentTokens, pattern) => splitTokensByPattern(currentTokens, pattern.regex, pattern.href), tokens);
+}
+
+function splitTokensByPattern(
+  tokens: LinkToken[],
+  regex: RegExp,
+  createHref: (value: string) => string,
+) {
+  const nextTokens: LinkToken[] = [];
+
+  for (const token of tokens) {
+    if (token.type === "link") {
+      nextTokens.push(token);
+      continue;
+    }
+
+    regex.lastIndex = 0;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(token.value)) !== null) {
+      const start = match.index;
+      const raw = match[0];
+      const end = start + raw.length;
+
+      if (start > lastIndex) {
+        nextTokens.push({ type: "text", value: token.value.slice(lastIndex, start) });
+      }
+
+      const clean = trimTrailingPunctuation(raw);
+      const suffix = raw.slice(clean.length);
+
+      if (clean) {
+        nextTokens.push({ type: "link", value: clean, href: createHref(clean) });
+      }
+
+      if (suffix) {
+        nextTokens.push({ type: "text", value: suffix });
+      }
+
+      lastIndex = end;
+    }
+
+    if (lastIndex < token.value.length) {
+      nextTokens.push({ type: "text", value: token.value.slice(lastIndex) });
+    }
+  }
+
+  return nextTokens;
+}
+
+function trimTrailingPunctuation(value: string) {
+  return value.replace(/[.,!?;:]+$/g, "");
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function IconClose() {
