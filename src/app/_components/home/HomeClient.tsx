@@ -6,7 +6,6 @@ import SiteHeader from "../SiteHeader";
 import CategoryPill from "./CategoryPill";
 import { PropertyCard, WidePropertyCard } from "./PropertyCards";
 import {
-  Float,
   HoverLift,
   ImageReveal,
   InView,
@@ -14,13 +13,7 @@ import {
   Reveal,
   Stagger,
 } from "../Motion";
-import {
-  IconArrowUpRight,
-  IconPin,
-  IconShield,
-  IconSpark,
-  IconStar,
-} from "../icons";
+import { IconArrowUpRight, IconPin, IconSpark } from "../icons";
 import Image from "next/image";
 import FaqAccordion, { type FaqItem } from "../FaqAccordion";
 import Link from "next/link";
@@ -189,43 +182,16 @@ export default function HomeClient(props: {
     <div className="min-h-screen bg-[#eef1f5] text-zinc-900">
       <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-10 lg:px-16">
         <SiteHeader accent={ACCENT} />
+      </div>
 
-        <main className="pb-16">
-          <Reveal>
-            <section className="relative">
-              <HeroCarousel accent={ACCENT} />
+      <main className="pb-16">
+        <Reveal>
+          <section className="relative px-0 sm:px-0">
+            <HeroCarousel accent={ACCENT} />
+          </section>
+        </Reveal>
 
-              <Float
-                className="absolute -bottom-10 right-6 hidden w-[260px] rounded-2xl bg-white px-4 py-4 shadow-lg shadow-black/10 sm:block"
-                amplitude={6}
-                duration={6.5}
-                delay={0.15}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="text-xs font-semibold text-zinc-500">
-                      Trust score
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-2xl font-semibold leading-none">
-                        4.95
-                      </div>
-                      <div className="flex items-center gap-0.5">
-                        <IconStar style={{ color: ACCENT }} />
-                        <IconStar style={{ color: ACCENT }} />
-                        <IconStar style={{ color: ACCENT }} />
-                        <IconStar style={{ color: ACCENT }} />
-                        <IconStar style={{ color: ACCENT }} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid size-12 place-items-center rounded-2xl bg-[rgba(242,85,93,0.12)]">
-                    <IconShield accent={ACCENT} />
-                  </div>
-                </div>
-              </Float>
-            </section>
-          </Reveal>
+        <div className="mx-auto w-full max-w-7xl px-5 sm:px-10 lg:px-16">
           {/* 
           <Reveal delayMs={60}>
             <section id="about" className="mt-14 overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-zinc-100">
@@ -776,8 +742,8 @@ export default function HomeClient(props: {
               </div>
             </section>
           </Reveal> */}
-        </main>
-      </div>
+        </div>
+      </main>
       <SiteFooter accent={ACCENT} navy={NAVY} />
     </div>
   );

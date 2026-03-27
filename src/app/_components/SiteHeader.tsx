@@ -13,7 +13,9 @@ type MeResponse = {
 export default function SiteHeader({ accent }: { accent: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<{ name?: string; email?: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string; email?: string } | null>(
+    null,
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -26,12 +28,13 @@ export default function SiteHeader({ accent }: { accent: string }) {
         if (cancelled) return;
         setUser(data.data?.user ?? null);
         try {
-          const shouldOpen = window.sessionStorage.getItem("hay_auth_welcome") === "1";
+          const shouldOpen =
+            window.sessionStorage.getItem("hay_auth_welcome") === "1";
           if (shouldOpen && data.data?.user) {
             window.sessionStorage.removeItem("hay_auth_welcome");
             setMenuOpen(true);
           }
-        } catch { }
+        } catch {}
       })
       .catch(() => {
         if (!cancelled) setUser(null);
@@ -46,7 +49,8 @@ export default function SiteHeader({ accent }: { accent: string }) {
       if (!menuOpen) return;
       const el = wrapRef.current;
       if (!el) return;
-      if (e.target instanceof Node && !el.contains(e.target)) setMenuOpen(false);
+      if (e.target instanceof Node && !el.contains(e.target))
+        setMenuOpen(false);
     };
     window.addEventListener("mousedown", onDown);
     return () => window.removeEventListener("mousedown", onDown);
@@ -72,7 +76,7 @@ export default function SiteHeader({ accent }: { accent: string }) {
       { href: "/faqs", label: "FAQs" },
       { href: "/contact", label: "Contact" },
     ],
-    []
+    [],
   );
 
   const initials = useMemo(() => {
@@ -82,16 +86,26 @@ export default function SiteHeader({ accent }: { accent: string }) {
   }, [user]);
 
   return (
-    <header className="relative z-50 flex items-center justify-between py-6">
+    <header className="relative z-50 flex items-center justify-between ">
       <Link href="/" className="flex items-center gap-2">
-        <Image src="/logo/logo1.png" alt="HAY Property" width={150} height={120} priority />
+        <Image
+          src="/logo/logo1.png"
+          alt="HAY Property"
+          width={150}
+          height={120}
+          priority
+        />
       </Link>
 
       <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 md:flex">
         {links.map((l) => {
           const active = pathname === l.href;
           return (
-            <Link key={l.href} className={active ? "text-zinc-900" : "hover:text-zinc-900"} href={l.href}>
+            <Link
+              key={l.href}
+              className={active ? "text-zinc-900" : "hover:text-zinc-900"}
+              href={l.href}
+            >
               {l.label}
             </Link>
           );
@@ -129,10 +143,16 @@ export default function SiteHeader({ accent }: { accent: string }) {
             {menuOpen ? (
               <div className="absolute right-0 z-50 mt-3 w-[260px] overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-zinc-200">
                 <div className="px-4 py-3">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Signed in</div>
-                  <div className="mt-1 truncate text-sm font-semibold text-zinc-900">{user.name || user.email}</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Signed in
+                  </div>
+                  <div className="mt-1 truncate text-sm font-semibold text-zinc-900">
+                    {user.name || user.email}
+                  </div>
                   {user.name && user.email ? (
-                    <div className="mt-1 truncate text-xs text-zinc-500">{user.email}</div>
+                    <div className="mt-1 truncate text-xs text-zinc-500">
+                      {user.email}
+                    </div>
                   ) : null}
                 </div>
                 <div className="h-px bg-zinc-100" />
@@ -169,7 +189,7 @@ export default function SiteHeader({ accent }: { accent: string }) {
                     type="button"
                     onClick={() => {
                       fetch("/api/auth/logout", { method: "POST" })
-                        .catch(() => { })
+                        .catch(() => {})
                         .finally(() => {
                           setUser(null);
                           setMenuOpen(false);
@@ -196,7 +216,10 @@ export default function SiteHeader({ accent }: { accent: string }) {
         <Link
           href="/contact"
           className="hidden rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 md:inline-block"
-          style={{ backgroundColor: accent, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+          style={{
+            backgroundColor: accent,
+            boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+          }}
         >
           Book Inspection
         </Link>
@@ -233,7 +256,9 @@ export default function SiteHeader({ accent }: { accent: string }) {
                     onClick={() => setMobileOpen(false)}
                     className={[
                       "block rounded-2xl px-4 py-3 text-sm font-semibold transition",
-                      active ? "bg-zinc-50 text-zinc-900" : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900",
+                      active
+                        ? "bg-zinc-50 text-zinc-900"
+                        : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900",
                     ].join(" ")}
                   >
                     {l.label}
@@ -295,7 +320,10 @@ export default function SiteHeader({ accent }: { accent: string }) {
                 href="/contact"
                 onClick={() => setMobileOpen(false)}
                 className="inline-flex h-11 w-full items-center justify-center rounded-full px-7 text-[11px] font-semibold uppercase tracking-[0.24em] text-white shadow-sm transition hover:opacity-95"
-                style={{ backgroundColor: accent, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+                style={{
+                  backgroundColor: accent,
+                  boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+                }}
               >
                 Book inspection
               </Link>
@@ -309,18 +337,52 @@ export default function SiteHeader({ accent }: { accent: string }) {
 
 function IconMenu() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 7h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M4 12h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4 7h16"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 12h16"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 17h16"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function IconClose() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
