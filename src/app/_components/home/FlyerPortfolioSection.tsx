@@ -33,7 +33,13 @@ export default function FlyerPortfolioSection({
   accent: string;
   items: FlyerPortfolioItem[];
 }) {
-  const flyers = useMemo(() => (Array.isArray(items) ? items : []).filter((x) => x && x.id && x.imageUrl), [items]);
+  const flyers = useMemo(
+    () =>
+      (Array.isArray(items) ? items : []).filter(
+        (x) => x && x.id && x.imageUrl,
+      ),
+    [items],
+  );
   const [index, setIndex] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const [paused, setPaused] = useState(false);
@@ -90,21 +96,35 @@ export default function FlyerPortfolioSection({
       <div className="grid gap-10">
         <div className="grid gap-5 sm:grid-cols-3">
           <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Estates</div>
-            <div className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">15+</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+              Verified land documentation
+            </div>
+            <div className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">
+              100%
+            </div>
           </div>
           <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Property consultants</div>
-            <div className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">100+</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+              Property value created
+            </div>
+            <div className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">
+              ₦200M
+            </div>
           </div>
           <div className="rounded-[22px] bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Happy clients</div>
-            <div className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">2500+</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+              Happy clients
+            </div>
+            <div className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">
+              200+
+            </div>
           </div>
         </div>
 
         <div className="space-y-2 text-center">
-          <div className="text-xs font-semibold uppercase tracking-[0.34em] text-zinc-500">Our property portfolio</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.34em] text-zinc-500">
+            Our property portfolio
+          </div>
           {/* <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Current flyers & deals</h2> */}
         </div>
 
@@ -198,7 +218,9 @@ export default function FlyerPortfolioSection({
                         "h-2 rounded-full transition",
                         active ? "w-8" : "w-2 hover:w-4",
                       ].join(" ")}
-                      style={{ backgroundColor: active ? accent : "rgba(0,0,0,0.18)" }}
+                      style={{
+                        backgroundColor: active ? accent : "rgba(0,0,0,0.18)",
+                      }}
                       aria-label={`Open ${f.name}`}
                     />
                   );
@@ -223,36 +245,64 @@ export default function FlyerPortfolioSection({
                       {current.badge ? (
                         <div
                           className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
-                          style={{ backgroundColor: "rgba(242,85,93,0.10)", color: accent }}
+                          style={{
+                            backgroundColor: "rgba(242,85,93,0.10)",
+                            color: accent,
+                          }}
                         >
                           {current.badge}
                         </div>
                       ) : null}
-                      <div className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">{current.name}</div>
-                      {current.location ? <div className="text-sm text-zinc-600">{current.location}</div> : null}
+                      <div className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+                        {current.name}
+                      </div>
+                      {current.location ? (
+                        <div className="text-sm text-zinc-600">
+                          {current.location}
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="rounded-[22px] bg-white p-5 shadow-sm ring-1 ring-zinc-100">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
-                          <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">From</div>
-                          <div className="mt-2 text-xl font-semibold" style={{ color: accent }}>
+                          <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+                            From
+                          </div>
+                          <div
+                            className="mt-2 text-xl font-semibold"
+                            style={{ color: accent }}
+                          >
                             {current.primaryPrice ?? "—"}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Initial deposit</div>
-                          <div className="mt-2 text-xl font-semibold text-zinc-900">{current.deposit ?? "—"}</div>
+                          <div className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+                            Initial deposit
+                          </div>
+                          <div className="mt-2 text-xl font-semibold text-zinc-900">
+                            {current.deposit ?? "—"}
+                          </div>
                         </div>
                       </div>
-                      {current.title ? <div className="mt-4 text-sm text-zinc-600">Title: {current.title}</div> : null}
+                      {current.title ? (
+                        <div className="mt-4 text-sm text-zinc-600">
+                          Title: {current.title}
+                        </div>
+                      ) : null}
                     </div>
 
                     {clampList(current.priceLines, 6).length ? (
                       <div className="grid gap-2 rounded-[22px] bg-white p-5 shadow-sm ring-1 ring-zinc-100">
                         {clampList(current.priceLines, 6).map((line) => (
-                          <div key={line} className="flex items-start gap-2 text-sm text-zinc-700">
-                            <span className="mt-2 size-1.5 rounded-full bg-zinc-400" aria-hidden="true" />
+                          <div
+                            key={line}
+                            className="flex items-start gap-2 text-sm text-zinc-700"
+                          >
+                            <span
+                              className="mt-2 size-1.5 rounded-full bg-zinc-400"
+                              aria-hidden="true"
+                            />
                             <span>{line}</span>
                           </div>
                         ))}
@@ -263,7 +313,10 @@ export default function FlyerPortfolioSection({
                       <div className="grid gap-2 text-sm text-zinc-600">
                         {clampList(current.highlights, 4).map((h) => (
                           <div key={h} className="flex items-start gap-2">
-                            <span className="mt-2 size-1.5 rounded-full bg-zinc-400" aria-hidden="true" />
+                            <span
+                              className="mt-2 size-1.5 rounded-full bg-zinc-400"
+                              aria-hidden="true"
+                            />
                             <span>{h}</span>
                           </div>
                         ))}
@@ -274,7 +327,10 @@ export default function FlyerPortfolioSection({
                       <Link
                         href={current.propertyHref || "/properties"}
                         className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-                        style={{ backgroundColor: accent, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+                        style={{
+                          backgroundColor: accent,
+                          boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+                        }}
                       >
                         View property
                       </Link>

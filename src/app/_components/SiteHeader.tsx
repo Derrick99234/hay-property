@@ -71,7 +71,7 @@ export default function SiteHeader({ accent }: { accent: string }) {
     () => [
       { href: "/", label: "Home" },
       { href: "/about", label: "About us" },
-      { href: "/properties", label: "Property" },
+      { href: "/properties", label: "Properties" },
       { href: "/blog", label: "Blogs" },
       { href: "/faqs", label: "FAQs" },
       { href: "/contact", label: "Contact" },
