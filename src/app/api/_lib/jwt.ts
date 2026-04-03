@@ -8,7 +8,8 @@ type JwtPayload = {
 
 function base64UrlEncodeBytes(bytes: Uint8Array) {
   let binary = "";
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  for (let i = 0; i < bytes.length; i++)
+    binary += String.fromCharCode(bytes[i]);
   const b64 = btoa(binary);
   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
@@ -45,7 +46,7 @@ async function getHmacKey(secret: string) {
     keyBytes,
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign", "verify"]
+    ["sign", "verify"],
   );
   cachedKey = key;
   cachedSecret = secret;
@@ -54,13 +55,17 @@ async function getHmacKey(secret: string) {
 
 export function getJwtSecret() {
   const secret = process.env.JWT_SECRET;
-  if (process.env.NODE_ENV === "production" && !secret) {
+  if (!secret) {
     throw new Error("Missing JWT_SECRET in environment.");
   }
-  return secret || "dev_jwt_secret_change_me";
+  return secret;
 }
 
-export async function signJwt(input: { sub: string; role: "user" | "admin"; ttlSeconds: number }) {
+export async function signJwt(input: {
+  sub: string;
+  role: "user" | "admin";
+  ttlSeconds: number;
+}) {
   const header: JwtHeader = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
   const payload: JwtPayload = {
@@ -75,7 +80,11 @@ export async function signJwt(input: { sub: string; role: "user" | "admin"; ttlS
   const signingInput = `${encodedHeader}.${encodedPayload}`;
 
   const key = await getHmacKey(getJwtSecret());
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signingInput));
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(signingInput),
+  );
   const signature = base64UrlEncodeBytes(new Uint8Array(sig));
 
   return `${signingInput}.${signature}`;
@@ -96,7 +105,8 @@ export async function verifyJwt(token: string): Promise<JwtPayload | null> {
   }
 
   if (!header || header.alg !== "HS256" || header.typ !== "JWT") return null;
-  if (!payload?.sub || (payload.role !== "user" && payload.role !== "admin")) return null;
+  if (!payload?.sub || (payload.role !== "user" && payload.role !== "admin"))
+    return null;
   if (!payload.exp || typeof payload.exp !== "number") return null;
   const now = Math.floor(Date.now() / 1000);
   if (payload.exp <= now) return null;
@@ -106,10 +116,9 @@ export async function verifyJwt(token: string): Promise<JwtPayload | null> {
     "HMAC",
     key,
     base64UrlDecodeToBytes(encodedSignature),
-    new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`)
+    new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`),
   );
   if (!ok) return null;
 
   return payload;
 }
-
