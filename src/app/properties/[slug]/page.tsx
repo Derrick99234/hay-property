@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { connectMongo } from "../../../lib/mongodb";
 import { Property } from "../../../models/Property";
 import { User } from "../../../models/User";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import WishlistButton from "../../_components/WishlistButton";
 import SiteHeader from "../../_components/SiteHeader";
 import SiteFooter from "../../_components/SiteFooter";
@@ -66,9 +66,13 @@ function escapeHtml(input: string) {
 function PropertyDescription({ text }: { text: string }) {
   const normalized = normalizeDescriptionHtml(text);
   const safeHtml = normalized
-    ? DOMPurify.sanitize(normalized, {
-        ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "ol", "ul", "li", "a", "h2", "h3", "blockquote"],
-        ALLOWED_ATTR: ["href", "target", "rel"],
+    ? sanitizeHtml(normalized, {
+        allowedTags: ["p", "br", "strong", "em", "u", "ol", "ul", "li", "a", "h2", "h3", "blockquote"],
+        allowedAttributes: {
+          a: ["href", "target", "rel"],
+        },
+        allowedSchemes: ["http", "https", "mailto", "tel"],
+        allowProtocolRelative: false,
       })
     : "";
 
