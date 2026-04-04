@@ -45,8 +45,12 @@ body {
 .property-richtext {
   color: #3f3f46;
   font-size: 0.875rem;
+  max-width: 100%;
+  min-width: 0;
   overflow-wrap: break-word;
   word-break: normal;
+  hyphens: none;
+  white-space: normal;
   line-height: 1.75;
 }
 

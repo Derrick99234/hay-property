@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import mongoose from "mongoose";
 import { cookies } from "next/headers";
 import { connectMongo } from "../../../lib/mongodb";
+import { sanitizePropertyDescription } from "../../../lib/propertyDescription";
 import { Property } from "../../../models/Property";
 import { User } from "../../../models/User";
-import sanitizeHtml from "sanitize-html";
 import WishlistButton from "../../_components/WishlistButton";
 import SiteHeader from "../../_components/SiteHeader";
 import SiteFooter from "../../_components/SiteFooter";
@@ -44,63 +44,8 @@ function InfoItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function normalizeDescriptionHtml(input: string) {
-  const trimmed = input
-    .replace(/&shy;|&#173;|&#x00ad;/gi, "")
-    .replace(/[\u00AD\u200B\u200C\u200D\u2060\uFEFF]/g, "")
-    .trim();
-  if (!trimmed) return "";
-  if (/<[a-z][\s\S]*>/i.test(trimmed)) {
-    return trimmed
-      .replace(/([A-Za-z])\s*<br\s*\/?>\s*([A-Za-z])/g, "$1$2")
-      .replace(/([A-Za-z])\s*\n\s*([A-Za-z])/g, "$1$2");
-  }
-
-  const paragraphs = trimmed
-    .replaceAll("\r\n", "\n")
-    .replaceAll("\r", "\n")
-    .split(/\n{2,}/)
-    .map((part) => part.trim().replace(/\s*\n\s*/g, " "))
-    .filter(Boolean)
-    .map((part) => `<p>${escapeHtml(part)}</p>`);
-
-  return paragraphs.join("");
-}
-
-function escapeHtml(input: string) {
-  return input
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
 function PropertyDescription({ text }: { text: string }) {
-  const normalized = normalizeDescriptionHtml(text);
-  const safeHtml = normalized
-    ? sanitizeHtml(normalized, {
-        allowedTags: [
-          "p",
-          "br",
-          "strong",
-          "em",
-          "u",
-          "ol",
-          "ul",
-          "li",
-          "a",
-          "h2",
-          "h3",
-          "blockquote",
-        ],
-        allowedAttributes: {
-          a: ["href", "target", "rel"],
-        },
-        allowedSchemes: ["http", "https", "mailto", "tel"],
-        allowProtocolRelative: false,
-      })
-    : "";
+  const safeHtml = sanitizePropertyDescription(text);
 
   if (!safeHtml) {
     return (
@@ -314,7 +259,7 @@ export default async function PropertyPage({
             </div>
           </section>
 
-          <section className="grid max-w-7xl gap-10 lg:grid-cols-[68%_30%] lg:items-start">
+          <section className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
             <div className="min-w-0 space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-2">
@@ -354,7 +299,7 @@ export default async function PropertyPage({
                 <div className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
                   About property
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 max-w-full">
                   <PropertyDescription text={description} />
                 </div>
               </div>
