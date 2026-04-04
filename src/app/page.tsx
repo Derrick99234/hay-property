@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { connectMongo } from "../lib/mongodb";
+import { richTextToPlainText } from "../lib/richText";
 import { pickBlogImage, pickLandImage } from "../lib/unsplash";
 import { Blog } from "../models/Blog";
 import { Property } from "../models/Property";
@@ -130,7 +131,7 @@ export default async function Home() {
     const slug = String((b as any)?.slug ?? "");
     const title = String((b as any)?.title ?? "");
     const category = String((b as any)?.category ?? "");
-    const excerpt = String((b as any)?.excerpt ?? "");
+    const excerpt = String((b as any)?.excerpt ?? "").trim() || richTextToPlainText(String((b as any)?.content ?? "")).slice(0, 160).trim();
     const coverUrl = String((b as any)?.coverUrl ?? "").trim() || pickBlogImage(slug) || undefined;
     const href = slug ? `/blog/${slug}` : "/blog";
     return { id, href, title, category, excerpt, coverUrl };
@@ -164,4 +165,3 @@ export default async function Home() {
     </div>
   );
 }
-

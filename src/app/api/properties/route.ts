@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../lib/mongodb";
-import { sanitizePropertyDescription } from "../../../lib/propertyDescription";
 import { rewriteToPublicBaseUrl } from "../../../lib/r2";
+import { sanitizeRichText } from "../../../lib/richText";
 import { Property } from "../../../models/Property";
 import { getSession, isAdmin } from "../_lib/auth";
 import { getPagination, isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../_lib/http";
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         ? { type: "Point", coordinates: [body.lng, body.lat] }
         : undefined;
 
-    const description = typeof body.description === "string" ? sanitizePropertyDescription(body.description) : "";
+    const description = typeof body.description === "string" ? sanitizeRichText(body.description) : "";
 
     const created = await Property.create({
       title,

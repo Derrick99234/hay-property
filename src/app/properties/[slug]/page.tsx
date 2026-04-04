@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import mongoose from "mongoose";
 import { cookies } from "next/headers";
 import { connectMongo } from "../../../lib/mongodb";
-import { sanitizePropertyDescription } from "../../../lib/propertyDescription";
+import { sanitizeRichText } from "../../../lib/richText";
 import { Property } from "../../../models/Property";
 import { User } from "../../../models/User";
 import WishlistButton from "../../_components/WishlistButton";
@@ -45,7 +45,7 @@ function InfoItem({ label, value }: { label: string; value: string }) {
 }
 
 function PropertyDescription({ text }: { text: string }) {
-  const safeHtml = sanitizePropertyDescription(text);
+  const safeHtml = sanitizeRichText(text);
 
   if (!safeHtml) {
     return (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connectMongo } from "../../lib/mongodb";
+import { richTextToPlainText } from "../../lib/richText";
 import { Blog } from "../../models/Blog";
 import { pickBlogImage } from "../../lib/unsplash";
 import SiteHeader from "../_components/SiteHeader";
@@ -61,9 +62,10 @@ export default async function BlogPage({
   }
   const posts: Post[] = docs.map((d) => {
     const title = String((d as any).title ?? "");
+    const contentText = richTextToPlainText(String((d as any).content ?? ""));
     const excerpt =
       String((d as any).excerpt ?? "").trim() ||
-      String((d as any).content ?? "")
+      contentText
         .slice(0, 160)
         .trim();
     const category = String((d as any).category ?? "Insights");
@@ -72,7 +74,7 @@ export default async function BlogPage({
     const coverUrl =
       String((d as any).coverUrl ?? "").trim() ||
       fallbackCoverUrl(String((d as any).slug ?? ""));
-    const readTime = estimateReadTime(String((d as any).content ?? excerpt));
+    const readTime = estimateReadTime(contentText || excerpt);
     return {
       slug: String((d as any).slug ?? ""),
       title,

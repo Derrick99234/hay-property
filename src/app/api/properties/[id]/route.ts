@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../../lib/mongodb";
-import { sanitizePropertyDescription } from "../../../../lib/propertyDescription";
 import { rewriteToPublicBaseUrl } from "../../../../lib/r2";
+import { sanitizeRichText } from "../../../../lib/richText";
 import { Property } from "../../../../models/Property";
 import { isAdmin } from "../../_lib/auth";
 import { isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../../_lib/http";
@@ -101,7 +101,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
         update.slug = nextSlug;
       }
     }
-    if (typeof body.description === "string") update.description = sanitizePropertyDescription(body.description);
+    if (typeof body.description === "string") update.description = sanitizeRichText(body.description);
     if (Array.isArray(body.features)) {
       update.features = body.features.map((x) => String(x ?? "").trim()).filter(Boolean).slice(0, 20);
     }

@@ -13,7 +13,7 @@ const modules = {
   ],
 };
 
-const formats = ["header", "bold", "italic", "underline", "list", "bullet", "link"];
+const formats = ["header", "bold", "italic", "underline", "list", "link"];
 
 export default function RichTextEditor({
   value,

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connectMongo } from "../../../lib/mongodb";
+import { sanitizeRichText } from "../../../lib/richText";
 import { Blog } from "../../../models/Blog";
 import { pickBlogImage } from "../../../lib/unsplash";
 import SiteFooter from "../../_components/SiteFooter";
@@ -50,7 +51,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const title = String((doc as any).title ?? "");
   const excerpt = String((doc as any).excerpt ?? "");
-  const content = String((doc as any).content ?? "");
+  const content = sanitizeRichText(String((doc as any).content ?? ""));
   const category = String((doc as any).category ?? "Insights");
   const dateSrc = (doc as any).publishedAt ?? (doc as any).createdAt;
   const date = formatDateLabel(new Date(dateSrc));
@@ -89,15 +90,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             <div className="h-px bg-zinc-100" />
 
-            <div className="space-y-4 text-sm leading-7 text-zinc-700">
-              {content
-                .split(/\n{2,}/)
-                .map((block) => block.trim())
-                .filter(Boolean)
-                .map((block, idx) => (
-                  <p key={idx}>{block}</p>
-                ))}
-            </div>
+            <div
+              className="property-richtext max-w-none text-sm text-zinc-700"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
           </div>
         </div>
       </div>

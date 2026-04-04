@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../../_components/Modal";
 import Pagination from "../../_components/Pagination";
+import RichTextEditor from "../../_components/RichTextEditor";
 import { useAdminDB } from "../../_components/AdminProvider";
 import { AdminBlog, formatDateShort } from "../../_lib/adminStore";
 
@@ -439,12 +440,10 @@ function BlogForm({
       </Field>
 
       <Field label="Content">
-        <textarea
+        <RichTextEditor
           value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={8}
-          className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-zinc-300"
-          placeholder="Write the full article here..."
+          onChange={setContent}
+          placeholder="Write the full article with headings, lists, links, and emphasis."
         />
       </Field>
 

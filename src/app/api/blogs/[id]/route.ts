@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../../lib/mongodb";
 import { rewriteToPublicBaseUrl } from "../../../../lib/r2";
+import { sanitizeRichText } from "../../../../lib/richText";
 import { Blog } from "../../../../models/Blog";
 import { isAdmin } from "../../_lib/auth";
 import { isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../../_lib/http";
@@ -87,8 +88,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
         update.slug = nextSlug;
       }
     }
-    if (typeof body.excerpt === "string") update.excerpt = body.excerpt;
-    if (typeof body.content === "string") update.content = body.content;
+    if (typeof body.excerpt === "string") update.excerpt = body.excerpt.trim();
+    if (typeof body.content === "string") update.content = sanitizeRichText(body.content);
     if (typeof body.category === "string") update.category = body.category;
     if (typeof body.coverUrl === "string") update.coverUrl = body.coverUrl;
     if (typeof body.published === "boolean") update.published = body.published;

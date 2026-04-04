@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongo } from "../../../lib/mongodb";
 import { rewriteToPublicBaseUrl } from "../../../lib/r2";
+import { sanitizeRichText } from "../../../lib/richText";
 import { Blog } from "../../../models/Blog";
 import { getSession, isAdmin } from "../_lib/auth";
 import { getPagination, isMongoDuplicateKeyError, jsonError, jsonOk, readJsonBody, slugify } from "../_lib/http";
@@ -67,8 +68,8 @@ export async function POST(req: NextRequest) {
     const created = await Blog.create({
       title,
       slug,
-      excerpt: body.excerpt,
-      content: body.content,
+      excerpt: typeof body.excerpt === "string" ? body.excerpt.trim() : "",
+      content: typeof body.content === "string" ? sanitizeRichText(body.content) : "",
       category: body.category,
       coverUrl: body.coverUrl,
       published: Boolean(body.published),
