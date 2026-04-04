@@ -15,24 +15,28 @@ const ACCOLADES_BG = "/hay property team accolades.jpg";
 
 const TEAM = [
   {
-    name: "MR. AFOLABI OMOTAYO",
+    name: "Mr. Afolabi Omotayo",
     role: "Chief Executive Officer",
-    image: "/team/Chief Executive Officer.png",
+    image:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/pages-image/About/Mr.%20Afolabi%20Omotayo%20-%20Chief%20Executive%20Officer.jpg",
   },
   {
-    name: "MISS AFOLABI DAMILOLA",
-    role: "Sales/Content Strategist",
-    image: "/team/Sales Content Strategist.png",
+    name: "Damilola Afolabi",
+    role: "Sales Manager",
+    image:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/pages-image/About/Damilola%20Afolabi%20-%20Sales%20manager.jpeg",
   },
   {
-    name: "MR OGUNLEKE OLUWATOBI",
-    role: "Marketing & Communication Manager",
-    image: "/team/Marketing & Communication Manager.png",
+    name: "Rosemary Ekelekhomen",
+    role: "HR Manager",
+    image:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/pages-image/About/Rosemary%20Ekelekhomen%20-HR%20Manager.jpeg",
   },
   {
-    name: "MISS TEMITOPE ODEJIDE",
-    role: "Accountant",
-    image: "/team/Accountant.png",
+    name: "Temitope Odejide",
+    role: "Account Officer",
+    image:
+      "https://pub-edd6261085894e2db893376ace3b663e.r2.dev/pages-image/About/Temitope%20Odejide%20-%20Account%20Officer.jpeg",
   },
 ];
 
