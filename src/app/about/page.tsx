@@ -270,7 +270,7 @@ export default function AboutPage() {
                   <p className="text-lg text-white/70">Team accolades</p>
                 </div>
 
-                <div className="mt-10 grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-10 grid gap-8 text-center grid-cols-2 lg:grid-cols-3">
                   <Accolade value="5+" label="Years of industry expertise" />
                   <Accolade value="6+" label="Active states nationwide" />
                   <Accolade value="200+" label="Happy clients & investors" />
