@@ -65,9 +65,7 @@ export default async function BlogPage({
     const contentText = richTextToPlainText(String((d as any).content ?? ""));
     const excerpt =
       String((d as any).excerpt ?? "").trim() ||
-      contentText
-        .slice(0, 160)
-        .trim();
+      contentText.slice(0, 160).trim();
     const category = String((d as any).category ?? "Insights");
     const dateSrc = (d as any).publishedAt ?? (d as any).createdAt;
     const date = formatDateLabel(new Date(dateSrc));
@@ -96,7 +94,7 @@ export default async function BlogPage({
       <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-10 lg:px-16">
         <SiteHeader accent={ACCENT} />
 
-        <main className="pb-16">
+        <main className="pb-16 pt-8">
           <section className="relative overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-zinc-100">
             <div className="absolute inset-0 transform-gpu will-change-transform">
               <Image

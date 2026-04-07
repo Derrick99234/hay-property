@@ -73,7 +73,7 @@ export default function FaqsPage() {
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-10 lg:px-16">
         <SiteHeader accent={ACCENT} />
 
-        <main className="space-y-14">
+        <main className="space-y-14 py-6">
           <Reveal>
             <section className="overflow-hidden rounded-[28px] bg-[#131b2d]">
               <div className="relative px-8 py-12 sm:px-12 sm:py-16">
@@ -86,13 +86,17 @@ export default function FaqsPage() {
                     Frequently asked questions
                   </h1>
                   <p className="max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
-                    Quick answers about inspections, documentation, payments, and allocation.
+                    Quick answers about inspections, documentation, payments,
+                    and allocation.
                   </p>
                   <div className="flex flex-wrap items-center gap-3 pt-2">
                     <Link
                       href="/properties"
                       className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-                      style={{ backgroundColor: ACCENT, boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)" }}
+                      style={{
+                        backgroundColor: ACCENT,
+                        boxShadow: "0 14px 28px -18px rgba(242,85,93,0.85)",
+                      }}
                     >
                       Browse properties
                     </Link>
@@ -123,9 +127,13 @@ export default function FaqsPage() {
               </div>
 
               <div className="space-y-4 rounded-[28px] bg-zinc-50 p-6 ring-1 ring-zinc-100">
-                <div className="text-sm font-semibold text-zinc-900">Need more details?</div>
+                <div className="text-sm font-semibold text-zinc-900">
+                  Need more details?
+                </div>
                 <div className="text-sm leading-7 text-zinc-600">
-                  If your question is specific to a property or location, send a request and we’ll respond with the right documentation and next steps.
+                  If your question is specific to a property or location, send a
+                  request and we’ll respond with the right documentation and
+                  next steps.
                 </div>
                 <Link
                   href="/properties"
@@ -143,4 +151,3 @@ export default function FaqsPage() {
     </div>
   );
 }
-

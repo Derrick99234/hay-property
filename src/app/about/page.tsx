@@ -171,7 +171,7 @@ export default function AboutPage() {
       <div className="mx-auto w-full max-w-380 px-5 pb-14 pt-8 sm:px-10 lg:px-16">
         <SiteHeader accent={ACCENT} />
 
-        <main className={"space-y-20 sm:space-y-24 pb-6"}>
+        <main className={"space-y-20 sm:space-y-24 py-6"}>
           <Reveal>
             <section className="grid gap-10 lg:grid-cols-[1fr_520px] lg:items-center">
               <div className="space-y-7 pt-2">
@@ -305,10 +305,10 @@ export default function AboutPage() {
                   >
                     <div className="relative aspect-square bg-zinc-200">
                       <Image
-                        src={enc(t.image)}
+                        src={t.image}
                         alt={t.name}
                         fill
-                        className="object-cover transition duration-700 ease-out group-hover:scale-[1.03]"
+                        className="object-cover object-top transition duration-700 ease-out group-hover:scale-[1.03]"
                         sizes="(min-width: 1024px) 25vw, 50vw"
                       />
                       <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
