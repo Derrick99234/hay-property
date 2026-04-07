@@ -150,7 +150,7 @@ export default function HeroCarousel({ accent }: { accent: string }) {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-end">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex-wrap gap-3 hidden md:flex">
             {SLIDES.map((item, itemIndex) => {
               const active = itemIndex === index;
               return (
